@@ -1,0 +1,35 @@
+{
+  "name": "legioncodeinc",
+  "owner": {
+    "name": "Legion Code Inc.",
+    "url": "https://www.legioncodeinc.com"
+  },
+  "metadata": {
+    "description": "Claude plugins designed and built by Legion Code Inc.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "webapp-capture",
+      "source": "./plugins/webapp-capture",
+      "description": "Capture any live web app: demo videos, screenshot sets, and scripts; a full UI component library with DTCG design tokens, a Claude Design handoff zip, and a shadcn/ui map; visual and code inconsistency audits.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Legion Code Inc.",
+        "url": "https://www.legioncodeinc.com"
+      },
+      "homepage": "https://github.com/legioncodeinc/audit-my-app-with-claude-skill#readme",
+      "repository": "https://github.com/legioncodeinc/audit-my-app-with-claude-skill",
+      "license": "AGPL-3.0-or-later",
+      "keywords": [
+        "playwright",
+        "screenshots",
+        "demo-video",
+        "component-library",
+        "design-tokens",
+        "ui-audit"
+      ],
+      "category": "development"
+    }
+  ]
+}

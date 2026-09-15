@@ -86,3 +86,9 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+# Webapp Capture: never commit login sessions or local capture state
+.capture/
+*.session.json
+auth.json
+.DS_Store
