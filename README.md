@@ -3,19 +3,13 @@
 <h1 align="center">Audit My App with Claude</h1>
 
 <p align="center">
-  <strong>Point Claude at any running web app and get back what a whole design and QA team would.</strong><br>
-  A demo video with a script. Every screen, screenshotted. A complete component library with real design tokens. A list of everywhere your UI disagrees with itself.
+  <strong>Your app already contains a design system. Make it visible.</strong>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/plugin-webapp--capture%201.0.0-F7A823?style=flat-square" alt="webapp-capture 1.0.0">
   <img src="https://img.shields.io/badge/works%20with-Claude%20Code%20%7C%20Cowork%20%7C%20claude.ai-6E6A62?style=flat-square" alt="Works with Claude Code, Cowork, claude.ai">
-  <img src="https://img.shields.io/badge/license-AGPL--3.0--or--later-111111?style=flat-square" alt="AGPL-3.0-or-later">
-</p>
-
-<p align="center">
-  <a href="https://linktr.ee/marioaldayuz"><img src="https://img.shields.io/badge/designed%20by-Mario%20Aldayuz-8B7CF0?style=flat-square" alt="Designed by Mario Aldayuz"></a>
-  <a href="https://www.legioncodeinc.com"><img src="https://img.shields.io/badge/built%20by-Legion%20Code%20Inc.-111111?style=flat-square" alt="Built by Legion Code Inc."></a>
+  <a href="LICENSE.md"><img src="https://img.shields.io/github/license/legioncodeinc/app-auditor-plugin-claude?style=flat-square" alt="AGPL-3.0-or-later license"></a>
 </p>
 
 <p align="center">
@@ -29,7 +23,35 @@
 
 <p align="center"><em>Designed and built by <a href="https://github.com/legioncodeinc">Legion Code Inc.</a></em></p>
 
+<p align="center">
+  <img src="assets/media/audit-my-app.jpg" alt="Audit My App with Claude illustrated app-auditing workspace">
+</p>
+
 ---
+
+Audit My App with Claude turns a running web application into a documented component library, measured design tokens, organized screenshots, demo videos, and actionable UI inconsistency findings.
+
+Inspect what users actually see. Find mismatched colors, inconsistent spacing, and components that behave like they were built by five different teams. Package the results for Claude Design or map them to shadcn/ui.
+
+Designed and built by Legion Code Inc.
+
+**I am Legion. We are Legion.**
+
+## Quick start
+
+```bash
+claude plugin marketplace add legioncodeinc/app-auditor-plugin-claude
+claude plugin install webapp-capture@legioncodeinc
+```
+
+Then start Claude Code in a project where your app is running:
+
+```text
+/webapp-capture doctor
+/webapp-capture all http://localhost:3000
+```
+
+The first command reports missing local requirements and their fixes. The second opens intake and dry-run steps before capturing the full app.
 
 ## What you get
 
@@ -52,22 +74,15 @@ The package is built from measured values, never guesses. It reads the rendered 
 
 The first production run captured an 87-route AI gateway dashboard: 107 page states, 25,698 elements, grouped into 948 visual groups and merged into **252 documented components**, with 255 icon glyphs, candidate tokens, and a 74-finding visual audit. Findings included seven near-identical white overlays used 1,678 times, eight different fills for "primary" buttons, and three incompatible treatments for destructive actions.
 
-## Install
+## Installation
 
-### Claude Code (recommended)
+The [quick start](#quick-start) is the recommended Claude Code installation path. The equivalent interactive commands are `/plugin marketplace add legioncodeinc/app-auditor-plugin-claude` and `/plugin install webapp-capture@legioncodeinc`.
 
-```bash
-claude plugin marketplace add legioncodeinc/audit-my-app-with-claude-skill
-claude plugin install webapp-capture@legioncodeinc
-```
-
-Or inside a Claude Code session: `/plugin marketplace add legioncodeinc/audit-my-app-with-claude-skill`, then `/plugin install webapp-capture@legioncodeinc`. Restart Claude Code, then run `/webapp-capture`.
-
-### Claude Cowork
+### Plugin distribution for Claude Cowork
 
 Download `dist/webapp-capture-plugin-1.0.0.zip` from this repository and upload it as a plugin. Use the `/webapp-capture` command from the plugin's commands.
 
-### claude.ai (skill only)
+### Skill-only distribution for claude.ai
 
 Download `dist/webapp-capture-stinger-1.0.0.skill` and upload it under Settings, Capabilities, Skills. The skill carries the full procedure; script-based capture needs an environment that can run Node and a browser.
 
@@ -113,11 +128,29 @@ tools/build-dist.sh                      rebuilds dist/
 ## Build from source
 
 ```bash
-git clone https://github.com/legioncodeinc/audit-my-app-with-claude-skill.git
-cd audit-my-app-with-claude-skill
+git clone https://github.com/legioncodeinc/app-auditor-plugin-claude.git
+cd app-auditor-plugin-claude
 claude plugin validate ./plugins/webapp-capture
 tools/build-dist.sh
 ```
+
+## Support
+
+For installation help and reproducible bug reports, see [SUPPORT.md](SUPPORT.md). Feature requests and fixes are welcome through GitHub Issues and pull requests.
+
+## Support development
+
+If this plugin saves you time, help us keep building.
+
+Sponsor Legion Code Inc. to support maintenance, documentation, compatibility updates, and new capabilities for our open-source developer tools.
+
+I am Legion. We are Legion.
+
+Verified sponsorship links will be added after the corresponding funding accounts are active.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, validation, generated-distribution rules, and pull-request expectations. Please read [SECURITY.md](SECURITY.md) before reporting a vulnerability.
 
 ## Credits
 
