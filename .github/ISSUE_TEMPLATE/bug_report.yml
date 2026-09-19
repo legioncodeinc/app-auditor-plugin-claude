@@ -1,0 +1,76 @@
+name: Bug report
+description: Report a reproducible problem with the plugin or capture runtime
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem. Remove credentials, cookies, browser state, customer data, private URLs, and private screenshots before submitting. Use the private route in SECURITY.md for vulnerabilities.
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Plugin version
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: input
+    id: claude-version
+    attributes:
+      label: Claude runtime and version
+      description: For example, Claude Code, Claude Cowork, or claude.ai and its version when available.
+    validations:
+      required: true
+  - type: input
+    id: operating-system
+    attributes:
+      label: Operating system
+      placeholder: macOS 15.6, Ubuntu 24.04, Windows 11
+    validations:
+      required: true
+  - type: input
+    id: command-route
+    attributes:
+      label: Command and route
+      placeholder: /webapp-capture library http://localhost:3000
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Provide the smallest repeatable sequence that triggers the problem.
+      placeholder: |
+        1. Start the demo app...
+        2. Run...
+        3. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Sanitized logs
+      description: Paste only the relevant output after removing secrets and private data.
+      render: shell
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed credentials, session state, customer data, private URLs, and private screenshots.
+          required: true
+        - label: This report does not disclose a security vulnerability publicly.
+          required: true
