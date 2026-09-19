@@ -1,6 +1,6 @@
 <!-- ───────────────────────────────  HERO  ─────────────────────────────── -->
 
-<h1 align="center">Audit My App with Claude</h1>
+<h1 align="center">Make Demo Videos & Audit My UX/UI with Claude</h1>
 
 <p align="center">
   <strong>Your app already contains a design system. Make it visible.</strong>
@@ -24,12 +24,12 @@
 <p align="center"><em>Designed and built by <a href="https://github.com/legioncodeinc">Legion Code Inc.</a></em></p>
 
 <p align="center">
-  <img src="assets/media/audit-my-app.jpg" alt="Audit My App with Claude illustrated app-auditing workspace">
+  <img src="assets/media/audit-my-app.jpg" alt="Make Demo Videos & Audit My UX/UI with Claude">
 </p>
 
 ---
 
-Audit My App with Claude turns a running web application into a documented component library, measured design tokens, organized screenshots, demo videos, and actionable UI inconsistency findings.
+Make Demo Videos & Audit My UX/UI with Claude turns a running web application into a documented component library, measured design tokens, organized screenshots, demo videos, and actionable UI inconsistency findings.
 
 Inspect what users actually see. Find mismatched colors, inconsistent spacing, and components that behave like they were built by five different teams. Package the results for Claude Design or map them to shadcn/ui.
 
