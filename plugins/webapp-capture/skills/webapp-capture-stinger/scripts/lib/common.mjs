@@ -1,5 +1,5 @@
 // Shared helpers for webapp-capture-stinger scripts.
-// Designed by Legion Code Inc. Requires Node 20+, playwright-core, and a Chromium
+// Designed by Legion Code Inc. Requires Node 20.9+, playwright-core, and a Chromium
 // build (run `npm install` in scripts/, then `npx playwright install chromium`).
 import fs from "node:fs";
 import os from "node:os";
@@ -20,6 +20,7 @@ export const log = (...a) => console.log(new Date().toISOString().slice(11, 19),
 export const slugify = (s) =>
   String(s).toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 export const pad = (n, w = 3) => String(n).padStart(w, "0");
+const DESTRUCTIVE_ROUTE = /(?:^|[\/_?&=-])(?:logout|signout|delete|remove|reset|revoke|restart|purchase|pay|transfer|publish)(?=$|[\/_?&=-])/i;
 
 /** Fail fast with every problem at once, not the first one. */
 export function validateConfig(cfg) {
@@ -36,11 +37,28 @@ export function validateConfig(cfg) {
   need(cfg.auth && typeof cfg.auth.storageState === "string", "auth.storageState path is required");
   need(cfg.browser?.viewport?.width > 0 && cfg.browser?.viewport?.height > 0, "browser.viewport.width and height are required");
   need(cfg.browser?.deviceScaleFactor >= 1 && cfg.browser?.deviceScaleFactor <= 4, "browser.deviceScaleFactor must be between 1 and 4");
-  need(["nav-links", "list"].includes(cfg.routes?.discover), "routes.discover must be nav-links or list");
+  need(["nav-links", "crawl-links", "list"].includes(cfg.routes?.discover), "routes.discover must be nav-links, crawl-links, or list");
   if (cfg.routes?.discover === "list") need(Array.isArray(cfg.routes.list) && cfg.routes.list.length, "routes.list must be a non-empty array when discover is list");
+  if (cfg.routes?.discover === "crawl-links") {
+    const maxRoutes = Number(cfg.routes.maxRoutes ?? 200);
+    need(Number.isInteger(maxRoutes) && maxRoutes > 0, "routes.maxRoutes must be a positive integer");
+  }
   need(typeof cfg.tabs?.selector === "string", "tabs.selector is required");
-  for (const [key, pattern] of [["tabs.notATabLabel", cfg.tabs?.notATabLabel], ["icons.classPattern", cfg.icons?.classPattern]]) {
+  for (const [key, pattern] of [["tabs.notATabLabel", cfg.tabs?.notATabLabel], ["tabs.noTabsOnRoutePattern", cfg.tabs?.noTabsOnRoutePattern], ["icons.classPattern", cfg.icons?.classPattern]]) {
     try { new RegExp(pattern || ""); } catch (e) { errors.push(`${key} is not a valid regex: ${e.message}`); }
+  }
+  if (cfg.routes?.includePattern) {
+    try { new RegExp(cfg.routes.includePattern); } catch (e) { errors.push(`routes.includePattern is not a valid regex: ${e.message}`); }
+  }
+  if (cfg.onboarding?.denyPattern) {
+    try { new RegExp(cfg.onboarding.denyPattern); } catch (e) { errors.push(`onboarding.denyPattern is not a valid regex: ${e.message}`); }
+  }
+  if (cfg.onboarding?.outputSubdir) {
+    const parts = cfg.onboarding.outputSubdir.split(/[\\/]+/);
+    need(!path.isAbsolute(cfg.onboarding.outputSubdir) && !path.win32.isAbsolute(cfg.onboarding.outputSubdir) && !parts.includes(".."), "onboarding.outputSubdir must stay inside the screenshots directory");
+  }
+  if (cfg.onboarding?.skipWhenApiHasItems) {
+    need(/^\/(?!\/)/.test(cfg.onboarding.skipWhenApiHasItems), "onboarding.skipWhenApiHasItems must be a same-origin absolute path");
   }
   for (const p of cfg.redact?.patterns || []) {
     try { new RegExp(p, "gi"); } catch (e) { errors.push(`redact.patterns entry is not a valid regex (${p}): ${e.message}`); }
@@ -173,9 +191,9 @@ export async function assertTheme(cfg, page) {
 }
 
 /** Navigate and enforce the capture preconditions (same origin, logged in, theme active). */
-export async function gotoChecked(cfg, page, route) {
+export async function gotoChecked(cfg, page, route, { idleMs = 8000, extraMs = 1200 } = {}) {
   await page.goto(cfg.app.origin + route, { waitUntil: "domcontentloaded", timeout: 30000 });
-  await settle(page);
+  await settle(page, idleMs, extraMs);
   const url = new URL(page.url());
   if (url.origin !== cfg.app.origin) throw new Error(`left origin: ${page.url()}`);
   if (cfg.app.loginPath && url.pathname === cfg.app.loginPath) throw new Error("session expired: log in again with save-session.mjs");
@@ -192,7 +210,49 @@ export function shotOptions(cfg, page, extra = {}) {
 /** Collect routes from same-origin nav links on startPath, or use the configured list. */
 export async function discoverRoutes(cfg, page) {
   const exclude = new Set(cfg.routes.exclude || []);
-  if (cfg.routes.discover === "list") return cfg.routes.list.filter((r) => !exclude.has(r));
+  if (cfg.routes.discover === "list") {
+    const routes = cfg.routes.list.filter((r) => !exclude.has(r) && !DESTRUCTIVE_ROUTE.test(r));
+    if (!routes.length) throw new Error("routes.list contains no safe routes after exclusions");
+    return routes;
+  }
+  if (cfg.routes.discover === "crawl-links") {
+    const start = cfg.routes.startPath || "/";
+    const maxRoutes = Math.max(1, Number(cfg.routes.maxRoutes || 200));
+    const include = cfg.routes.includePattern ? new RegExp(cfg.routes.includePattern) : null;
+    const queued = new Set([start]);
+    const visited = new Set();
+    const routes = [];
+    const isExcluded = (route) => {
+      const pathname = new URL(route, cfg.app.origin).pathname;
+      return exclude.has(route) || exclude.has(pathname) || pathname === cfg.app.loginPath || DESTRUCTIVE_ROUTE.test(route) || (include && !include.test(pathname));
+    };
+
+    while (queued.size && routes.length < maxRoutes) {
+      const route = queued.values().next().value;
+      queued.delete(route);
+      if (visited.has(route) || isExcluded(route)) continue;
+      visited.add(route);
+      await gotoChecked(cfg, page, route, { idleMs: 1500, extraMs: 250 });
+      const current = new URL(page.url());
+      const canonical = `${current.pathname}${current.search}`;
+      if (!isExcluded(canonical) && !routes.includes(canonical)) routes.push(canonical);
+      const links = await page.evaluate(() => Array.from(document.querySelectorAll("a[href]"), (a) => ({
+        href: a.href,
+        target: a.target,
+      })));
+      for (const link of links) {
+        if (link.target === "_blank") continue;
+        let url;
+        try { url = new URL(link.href); } catch { continue; }
+        if (url.origin !== cfg.app.origin) continue;
+        const candidate = `${url.pathname}${url.search}`;
+        if (!visited.has(candidate) && !isExcluded(candidate)) queued.add(candidate);
+      }
+    }
+    if (queued.size) log(`route discovery stopped at routes.maxRoutes=${maxRoutes}; ${queued.size} route(s) remain queued`);
+    if (!routes.length) throw new Error(`no routes discovered from ${start}`);
+    return routes;
+  }
   await gotoChecked(cfg, page, cfg.routes.startPath || "/");
   const found = await page.evaluate(() => {
     const seen = new Set();
@@ -205,7 +265,7 @@ export async function discoverRoutes(cfg, page) {
     }
     return out;
   });
-  const routes = found.filter((r) => !exclude.has(r) && r !== cfg.app.loginPath);
+  const routes = found.filter((r) => !exclude.has(r) && r !== cfg.app.loginPath && !DESTRUCTIVE_ROUTE.test(r));
   if (!routes.length) throw new Error(`no routes discovered on ${cfg.routes.startPath || "/"}; use routes.discover "list"`);
   return routes;
 }
@@ -223,6 +283,7 @@ export const shard = (items, n) => {
 /** Tabs: visible tab elements that are real views, not setting pickers or filters. */
 export async function listTabs(cfg, page, route) {
   if ((cfg.tabs.noTabsOnRoutes || []).includes(route)) return [];
+  if (cfg.tabs.noTabsOnRoutePattern && new RegExp(cfg.tabs.noTabsOnRoutePattern).test(route)) return [];
   const notATab = new RegExp(cfg.tabs.notATabLabel || "^$", "i");
   const tabs = page.locator(`${cfg.tabs.selector}:visible`);
   const info = await tabs.evaluateAll((els, iconPattern) => els.map((el, index) => {

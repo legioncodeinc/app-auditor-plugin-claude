@@ -2,7 +2,7 @@
 name: webapp-capture-stinger
 description: Capture live web apps. Demo videos and scripts; component library with tokens, a Claude Design handoff zip, and a shadcn/ui map; visual and code audits.
 license: AGPL-3.0-or-later
-compatibility: Claude Code 2.1 or newer, Cursor 2.4 or newer, Codex, Cowork. Scripts need Node 20, playwright-core, Chromium; sharp and ffmpeg for some routes.
+compatibility: Claude Code 2.1 or newer, Cursor 2.4 or newer, Codex, Cowork. Scripts need Node 20.9, playwright-core, Chromium; sharp and ffmpeg for some routes.
 metadata:
   author: Legion Code Inc.
   designed-by: Legion Code Inc.
@@ -10,7 +10,7 @@ metadata:
   hive-bee: webapp-capture-worker-bee
   pair-bee: webapp-capture-worker-bee
   domain: web app capture
-  version: 1.0.0
+  version: 1.1.0
 ---
 
 # Webapp Capture Stinger

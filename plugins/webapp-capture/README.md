@@ -1,6 +1,6 @@
 # Webapp Capture
 
-**Designed and built by [Legion Code Inc.](https://www.legioncodeinc.com)** Version 1.0.0. Licensed under AGPL-3.0-or-later.
+**Designed and built by [Legion Code Inc.](https://www.legioncodeinc.com)** Version 1.1.0. Licensed under AGPL-3.0-or-later.
 
 Capture any running web app the way its users see it, then turn that capture into something people and AI agents can build on.
 
@@ -39,7 +39,7 @@ Claude asks for anything it cannot infer (environment, theme, output folder, sen
 
 ## Safety model
 
-Read-only crawling, human-only login, off-origin navigation blocking, theme guard, text redaction, screenshot masks, demo plan approval, destructive-target and secret-field guards, and a Ship Gate before any commit. Details: `skills/webapp-capture-stinger/guides/00-foundation.md`.
+Read-only crawling by default, explicitly approved local or seeded onboarding, human-only login, off-origin navigation blocking, theme guard, text redaction, screenshot masks, destructive-target and secret-field guards, and a Ship Gate before any commit. Details: `skills/webapp-capture-stinger/guides/00-foundation.md`.
 
 ## Troubleshooting
 

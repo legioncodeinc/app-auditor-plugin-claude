@@ -7,6 +7,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { assertTheme, discoverRoutes, gotoChecked, listTabs, loadConfig, log, openApp, pad, routeSlug, settle, shard, shotOptions, tabName, withTimeout } from "./lib/common.mjs";
+import { runOnboarding } from "./lib/onboarding.mjs";
 
 const cfg = loadConfig();
 const OUT = cfg.output.screenshots || path.join(cfg.output.inventory, "screenshots");
@@ -15,7 +16,9 @@ const { browser, page } = await openApp(cfg);
 let failures = 0;
 
 try {
+  if (!process.env.SHARDS && !process.env.WEBAPP_CAPTURE_ONBOARDING_DONE) await runOnboarding(cfg, page, OUT);
   let routes = process.env.ROUTES ? process.env.ROUTES.split(",").filter(Boolean) : await discoverRoutes(cfg, page);
+  log(`capturing ${routes.length} route(s)`);
   if (process.env.SHARDS) routes = shard(routes, Number(process.env.SHARDS))[Number(process.env.SHARD || 0)] || [];
   fs.mkdirSync(OUT, { recursive: true });
   const manifest = path.join(OUT, `manifest${process.env.SHARDS ? `-${process.env.SHARD || 0}` : ""}.tsv`);
@@ -26,13 +29,15 @@ try {
     await page.evaluate(() => {
       const doc = document.scrollingElement;
       let best = doc.scrollHeight > doc.clientHeight + 1 ? doc : null;
-      let area = best ? innerWidth * innerHeight : 0;
+      let score = best ? innerWidth * innerHeight * (doc.scrollHeight / Math.max(1, doc.clientHeight)) : 0;
       for (const el of document.querySelectorAll("*")) {
         const oy = getComputedStyle(el).overflowY;
         if (!["auto", "scroll", "overlay"].includes(oy) || el.scrollHeight <= el.clientHeight + 1) continue;
         if (el.getBoundingClientRect().width < innerWidth * 0.4) continue; // ignore sidebars and dropdowns
+        if (el.clientHeight < innerHeight * 0.35) continue; // ignore textareas and short nested lists
         const a = el.clientWidth * el.clientHeight;
-        if (a > area) { best = el; area = a; }
+        const candidateScore = a * (el.scrollHeight / Math.max(1, el.clientHeight));
+        if (candidateScore > score) { best = el; score = candidateScore; }
       }
       window.__scroller = best || doc;
       window.__scroller.scrollTop = 0;
@@ -63,8 +68,16 @@ try {
         fs.appendFileSync(manifest, `${route}\t${slug}\t${main.shots}\t${main.truncated}\t${page.url()}\n`);
         log(`${route}: ${main.shots} shots${main.truncated ? " (truncated at routes.maxShots)" : ""}`);
         for (const t of (await listTabs(cfg, page, route)).filter((x) => !x.selected)) {
+          await gotoChecked(cfg, page, route);
+          const currentTabs = await listTabs(cfg, page, route);
+          const current = currentTabs.find((candidate) => candidate.index === t.index && candidate.label === t.label && !candidate.selected)
+            || currentTabs.find((candidate) => candidate.label === t.label && !candidate.selected);
+          if (!current) {
+            log(`  tab ${t.label}: skipped because it is no longer available from the base route`);
+            continue;
+          }
           const before = page.url();
-          await page.locator(`${cfg.tabs.selector}:visible`).nth(t.index).click({ timeout: 5000 });
+          await page.locator(`${cfg.tabs.selector}:visible`).nth(current.index).click({ timeout: 5000 });
           await settle(page);
           await assertTheme(cfg, page);
           const name = tabName(before, page.url(), t.label);

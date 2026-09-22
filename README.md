@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/plugin-webapp--capture%201.0.0-F7A823?style=flat-square" alt="webapp-capture 1.0.0">
+  <img src="https://img.shields.io/badge/plugin-webapp--capture%201.1.0-F7A823?style=flat-square" alt="webapp-capture 1.1.0">
   <img src="https://img.shields.io/badge/works%20with-Claude%20Code%20%7C%20Cowork%20%7C%20claude.ai-6E6A62?style=flat-square" alt="Works with Claude Code, Cowork, claude.ai">
   <a href="LICENSE.md"><img src="https://img.shields.io/github/license/legioncodeinc/app-auditor-plugin-claude?style=flat-square" alt="AGPL-3.0-or-later license"></a>
 </p>
@@ -80,11 +80,11 @@ The [quick start](#quick-start) is the recommended Claude Code installation path
 
 ### Plugin distribution for Claude Cowork
 
-Download `dist/webapp-capture-plugin-1.0.0.zip` from this repository and upload it as a plugin. Use the `/webapp-capture` command from the plugin's commands.
+Download `dist/webapp-capture-plugin-1.1.0.zip` from this repository and upload it as a plugin. Use the `/webapp-capture` command from the plugin's commands.
 
 ### Skill-only distribution for claude.ai
 
-Download `dist/webapp-capture-stinger-1.0.0.skill` and upload it under Settings, Capabilities, Skills. The skill carries the full procedure; script-based capture needs an environment that can run Node and a browser.
+Download `dist/webapp-capture-stinger-1.1.0.skill` and upload it under Settings, Capabilities, Skills. The skill carries the full procedure; script-based capture needs an environment that can run Node and a browser.
 
 Verify downloads against `dist/SHA256SUMS`.
 
@@ -92,7 +92,7 @@ Verify downloads against `dist/SHA256SUMS`.
 
 | Need | Why | Install |
 | --- | --- | --- |
-| Node 20 or newer | Runs the capture scripts | [nodejs.org](https://nodejs.org) |
+| Node 20.9 or newer | Runs the capture scripts and satisfies the Sharp 0.35 runtime floor | [nodejs.org](https://nodejs.org) |
 | Chromium for Playwright | Headless browser | Claude runs `npx playwright install chromium` for you when missing |
 | ffmpeg | Demo video assembly only | `brew install ffmpeg`, `apt install ffmpeg`, or `winget install ffmpeg` |
 | A running copy of your app | The thing being captured | Local, staging, or a seeded demo account is best |
@@ -102,7 +102,7 @@ The plugin's script dependencies (Playwright core and sharp) install on first us
 ## How it stays safe
 
 - **You log in, Claude never does.** A real browser window opens; you sign in (MFA and SSO work). Claude never sees, types, or stores your password. The saved session is owner-only and checked for gitignore coverage.
-- **Read-only by design.** Capture navigates pages, scrolls, and switches tabs. It never submits forms, flips settings, or clicks delete, restart, or logout. Anything that looks like a setting picker is excluded after a dry run.
+- **Read-only by default.** Ordinary capture navigates pages, scrolls, and switches tabs. An optional local or seeded onboarding plan can submit only the exact setup actions you approve, once, with a screenshot before every step and built-in blocks for secrets and destructive controls.
 - **Stays on your app.** Navigation to any other origin is blocked; popups are closed.
 - **Secrets stay out.** Captured text passes redaction patterns seeded from GitHub secret scanning and the OWASP logging guidance. Sensitive screen regions are painted over with solid masks.
 - **Demos need your approval.** The recorder refuses to run a demo plan you have not approved, and refuses destructive-looking clicks or typing into secret fields.

@@ -6,7 +6,7 @@ Field tables, script map, and output contracts. Load when running any script, ed
 
 | Need | Install | Used by |
 |---|---|---|
-| Node 20 or newer | system | all scripts (ES modules) |
+| Node 20.9 or newer | system | all scripts (ES modules and Sharp 0.35) |
 | playwright-core, sharp | `npm install` inside `scripts/` (its `package.json` pins both) | browser scripts; sharp for component sheets |
 | Chromium | `npx playwright install chromium` inside `scripts/`, or set `browser.executablePath` | browser scripts |
 | ffmpeg | system package | demo/make-video.sh |
@@ -24,6 +24,10 @@ Start from `scripts/capture.config.example.json`. Relative paths resolve against
 | `app.context` | string | One sentence on what the app is and who uses it; feeds describe and merge prompts |
 | `app.loginPath` | path | Landing here during capture means the session expired; capture stops |
 | `auth.storageState` | path | Saved cookies and localStorage from `save-session.mjs` (plus a `.session.json` sidecar for sessionStorage); owner-only permissions; never commit |
+| `onboarding.enabled/approved` | boolean | Both must be true after explicit user approval; runs once before screenshot or inventory shards |
+| `onboarding.environment` | local, seeded | Required when onboarding is enabled; any other value is refused |
+| `onboarding.denyPattern` | regex string | Adds app-specific blocked click labels; the built-in destructive-action denylist always remains active |
+| `onboarding.outputSubdir` | relative path | Screenshot folder under `output.screenshots`; parent traversal and absolute paths are rejected |
 | `browser.viewport` | {width,height} | CSS pixels. 1600x1013 matches a 14 to 16 inch laptop browser |
 | `browser.deviceScaleFactor` | number | 2 for Retina, 3 for extra-sharp reference captures |
 | `browser.colorScheme` | light, dark, no-preference | Emulated `prefers-color-scheme` |
@@ -31,11 +35,14 @@ Start from `scripts/capture.config.example.json`. Relative paths resolve against
 | `browser.shards` | number | Parallel headless browsers. Budget roughly 0.5 to 1 GB RAM each at 3x |
 | `theme.localStorage.key/value` | string | Force an app-stored theme before any page script runs |
 | `theme.verify.htmlClassIncludes` | string | Capture refuses to shoot if `<html>` lacks this class |
-| `routes.discover` | nav-links, list | nav-links: every same-origin link on `startPath` |
+| `routes.discover` | nav-links, crawl-links, list | nav-links reads `startPath`; crawl-links recursively follows same-origin anchors |
+| `routes.maxRoutes` | number | Route cap for recursive `crawl-links` discovery |
+| `routes.includePattern` | regex string | Optional pathname allowlist for recursive discovery |
 | `routes.exclude` | path[] | Never visited (logout, docs that open new tabs, destructive pages) |
 | `routes.maxShots` | number | Scroll-capture cap per page state |
 | `tabs.selector` | CSS | Default `[role="tab"]` |
 | `tabs.noTabsOnRoutes` | path[] | Routes whose tab-looking controls change settings or only filter |
+| `tabs.noTabsOnRoutePattern` | regex string | Optional route-family exclusion for tab-like controls that are not views |
 | `tabs.notATabLabel` | regex | Labels that are pickers or filters (themes, date ranges) |
 | `icons.classPattern` | regex | Icon-font elements, e.g. `material-(symbols|icons)` |
 | `redact.patterns` | regex[] | Applied to captured text and HTML before anything is written |
@@ -45,15 +52,24 @@ Start from `scripts/capture.config.example.json`. Relative paths resolve against
 | `ai.describeBatchSize` | number | Groups per describe agent. 10 keeps agents from skipping images |
 | `ai.maxConcurrentAgents` | number | Stay under the harness subagent cap (a cap of 20 was observed in Claude Code) |
 
+`routes.discover` also accepts `crawl-links`, which recursively follows
+same-origin anchors. Optional `onboarding` config can declare an approved setup
+plan using `waitFor` targets and `fill`, `click`, `wait`, or `waitFor` actions.
+The preflight refuses password, secret, token, and API-key fields or values and records a
+screenshot before every step. Set `onboarding.skipWhenApiHasItems` to a
+same-origin JSON array endpoint when an existing seeded account should make the
+preflight idempotently skip.
+
 ## Script map
 
 | Script | Route | Input | Output |
 |---|---|---|---|
-| `doctor.mjs` | all | config (optional), `--route demo\|library\|audit` | Readiness report with fixes; exit 1 on blocking problems |
+| `doctor.mjs` | all | config (optional), `--route screenshots\|demo\|library\|audit` | Readiness report with fixes; exit 1 on blocking problems |
 | `save-session.mjs` | all | config | `auth.storageState` plus `.session.json` sidecar after a human logs in |
-| `parallel.mjs` | all | config, `<script> --shards N` | Runs a browser script across N headless browsers, capped by memory and CPUs; exit 1 if any shard fails |
+| `parallel.mjs` | all | config, `<script> --shards N` | Runs approved onboarding once, then a browser script across N headless browsers capped by memory and CPUs; exit 1 if any shard fails |
 | `lib/common.mjs` | all | | config validation, browser launch, session restore, masks, route discovery, tab listing, naming, timeouts |
 | `screenshots.mjs` | 1 | config | `<screenshots>/<route>/<route>-001.png`, `<route>__<tab>-001.png`, `manifest.tsv` |
+| `merge-screenshot-manifests.mjs` | 1 | ordered `CAPTURE_MANIFESTS`, optional `CAPTURE_IGNORE_STATE_PATTERN` | Final state ledger where successful retries supersede earlier errors or truncations |
 | `demo/record-demo.mjs` | 1 | config + approved plan JSON | `scenes/*.webm`, `screenshots/*.png`, `captions.vtt`, `script.md`, `make-video.sh` |
 | `inventory/extract.mjs` | 2, 3 | config | `_raw/<state>.json` (candidates, stats, CSS vars), `_raw/crops/*.png` |
 | `inventory/cluster.mjs` | 2, 3 | `RAW` | `_raw/groups.json` (exact signatures merged into fuzzy groups) |
@@ -66,7 +82,7 @@ Start from `scripts/capture.config.example.json`. Relative paths resolve against
 | `inventory/build.mjs` | 2 | `RAW`, `DEST` | `components/<name>/`, `ledger.json`, `assets/`, copied `tokens-raw.json` |
 | `inventory/shadcn-prepare.mjs` | 4 | config, `BATCH`, `--pending` | `shadcn/batches/batch-NN.json`, `MAP-INSTRUCTIONS.md`, `THEME-INSTRUCTIONS.md`, dispatch plan |
 | `inventory/shadcn-build.mjs` | 4 | config, `--allow-missing-theme` | `shadcn/shadcn-map.json`, `SHADCN-MAP.md`, `globals.css`; exit 1 with batches to rerun |
-| `inventory/design-handoff.mjs` | 2, 3, 4 | config, `OUT`, `SHOTS_PER_COMPONENT`, `KEEP_PNG`, `SCREENSHOTS` | `<app>-claude-design-handoff-<date>.zip` with `CLAUDE-DESIGN-INSTRUCTIONS.md` |
+| `inventory/design-handoff.mjs` | 2, 3, 4 | config, `OUT`, `SHOTS_PER_COMPONENT`, `KEEP_PNG`, `SCREENSHOTS`, optional `HANDOFF_FILES` | `<app>-claude-design-handoff-<date>.zip` with `CLAUDE-DESIGN-INSTRUCTIONS.md` |
 | `audit/audit-visual.mjs` | 3 | `RAW` | `<report>.json`, `<report>.md` (near-duplicate colors, scale sprawl, component drift) |
 | `audit/audit-code.mjs` | 3 | `SRC` | `<report>.json`, `<report>.md` (hardcoded colors, arbitrary values, inline styles, repeated class lists) |
 

@@ -6,7 +6,8 @@ import { spawn } from "node:child_process";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { availableMemGb, loadConfig, log } from "./lib/common.mjs";
+import { availableMemGb, loadConfig, log, openApp } from "./lib/common.mjs";
+import { runOnboarding } from "./lib/onboarding.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
@@ -18,10 +19,31 @@ const memShards = Math.max(1, Math.floor(availableMemGb() / 0.9));
 const N = Math.max(1, Math.min(opt("--shards", cfg.browser.shards || 4), memShards, os.cpus().length));
 const TIMEOUT = opt("--timeout-min", 60) * 60000;
 const target = path.isAbsolute(script) ? script : path.join(here, script);
+const onboardingTargets = new Set(["screenshots.mjs", "extract.mjs"]);
+let onboardingAttempted = false;
+
+if (cfg.onboarding?.enabled && onboardingTargets.has(path.basename(target))) {
+  const out = cfg.output.screenshots || path.join(cfg.output.inventory, "screenshots");
+  const { browser, page } = await openApp(cfg);
+  try {
+    await runOnboarding(cfg, page, out);
+    onboardingAttempted = true;
+  } finally {
+    await browser.close();
+  }
+}
 
 log(`running ${path.relative(here, target)} on ${N} shard(s)`);
 const results = await Promise.all(Array.from({ length: N }, (_, i) => new Promise((resolve) => {
-  const child = spawn(process.execPath, [target], { env: { ...process.env, SHARD: String(i), SHARDS: String(N) }, stdio: ["ignore", "pipe", "pipe"] });
+  const child = spawn(process.execPath, [target], {
+    env: {
+      ...process.env,
+      SHARD: String(i),
+      SHARDS: String(N),
+      ...(onboardingAttempted ? { WEBAPP_CAPTURE_ONBOARDING_DONE: "1" } : {}),
+    },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
   const prefix = (chunk) => chunk.toString().split("\n").filter(Boolean).map((l) => `[shard ${i}] ${l}`).join("\n");
   let errored = false;
   child.stdout.on("data", (d) => { const t = prefix(d); if (/ERROR/.test(t)) errored = true; console.log(t); });

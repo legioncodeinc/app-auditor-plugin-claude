@@ -7,6 +7,7 @@ import { capturePaths } from "../lib/common.mjs";
 const P = capturePaths();
 const RAW = P.raw;
 const DEST = process.env.DEST || P.tokensRaw;
+const capturedTheme = P.cfg?.browser?.colorScheme || "unknown";
 
 const states = fs
   .readdirSync(RAW)
@@ -100,11 +101,11 @@ if (varsState) {
 }
 
 const out = {
-  generatedFrom: { states: states.length, routes: new Set(states.map((s) => s.route)).size, theme: "dark" },
+  generatedFrom: { states: states.length, routes: new Set(states.map((s) => s.route)).size, theme: capturedTheme },
   notes: [
     "observed.* counts are text or box occurrences across all captured page states; routes = distinct routes using the value.",
     "Colors are normalized to hex, with an alpha byte when opacity < 1.",
-    "cssVariables.resolvedByPrefix are computed values on <html> in dark theme; definedBySelector shows the raw declarations per selector (light and dark sets).",
+    `cssVariables.resolvedByPrefix are computed values on <html> in ${capturedTheme} theme; definedBySelector shows the raw declarations per selector (light and dark sets).`,
   ],
   observed,
   cssVariables,

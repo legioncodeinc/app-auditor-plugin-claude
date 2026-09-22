@@ -16,7 +16,7 @@ Arguments: `$ARGUMENTS`
 Read these before anything else and hold them for the whole run.
 
 1. **Never handle credentials.** Never type, paste, script, print, or store passwords, tokens, API keys, or MFA codes. A human logs in through `save-session.mjs` in a visible browser window.
-2. **Never change the app.** Crawls only navigate same-origin routes, scroll, and click tabs that pass the tab filter. No form submits, saves, toggles, deletes, restarts, or logouts. Demo interactions happen only from a plan the user approved.
+2. **Ordinary crawls never change the app.** They only navigate same-origin routes, scroll, and click tabs that pass the tab filter. The sole setup exception is an onboarding plan for a local or seeded environment whose exact actions the user explicitly approved. It runs once before browser shards, screenshots every step before acting, and retains the built-in secret-field and destructive-click blocks. Demo interactions likewise require an approved plan.
 3. **Prefer non-production.** Recommend local, staging, or a seeded demo account. If the user chooses production, say plainly that screenshots will contain real data, and configure masks.
 4. **Keep secrets out of artifacts.** Text passes `redact.patterns`; sensitive screen regions go in `redact.maskSelectors`. Review sample screenshots before reporting.
 5. **Never commit capture secrets or bulk raw data.** Session files are always gitignored. Raw capture data (`_raw/`, crops) is committed only if the user asks.
@@ -56,6 +56,7 @@ Ask everything you cannot infer, in a single AskUserQuestion call where possible
 - **Route discovery**: every link in the main navigation (default) or an explicit route list.
 - **Output location** in the current repository. Defaults: `library/design/` for library and demo, `library/requirements/reports/` for audits.
 - **Sensitive regions** to mask (customer names, emails, keys, billing).
+- **Onboarding setup**, when the local or seeded app is empty: the exact fields, values, and buttons required. Show the complete action plan and get explicit approval before setting `onboarding.approved: true`. Never run onboarding against production.
 - Route specifics:
   - demo: audience, goal, target length (60 to 90 seconds by default), must-show flows, narration wanted (text only, or synthesized audio with the user's own TTS key).
   - audit: path to the app's source code, if available.
@@ -66,6 +67,7 @@ Ask everything you cannot infer, in a single AskUserQuestion call where possible
 
 1. **Dependencies.** If `SKILL_DIR/scripts/node_modules` is missing, run `npm install` in `SKILL_DIR/scripts`. If `doctor.mjs` later reports no Chromium, run `npx playwright install chromium` in the same folder.
 2. **Config.** Copy `SKILL_DIR/scripts/capture.config.example.json` to `<output>/capture.config.json` in the target repo and fill it from intake. Set `auth.storageState` to a path inside a gitignored folder (for example `.capture/auth.json`).
+   If approved onboarding is required, set `onboarding.environment` to `local` or `seeded`, set both `onboarding.enabled` and `onboarding.approved` to `true`, encode only the approved actions, and keep the built-in denylist active. The scripts refuse any other environment. `parallel.mjs` runs this preflight once before screenshot or inventory shards.
 3. **Gitignore.** Add the session file, its `.session.json` sidecar, and the capture folder's `_raw/` (unless the user wants raw data committed) to the repo's `.gitignore`. Show the user the lines you added.
 4. **Doctor.** Run `CAPTURE_CONFIG=<config> node SKILL_DIR/scripts/doctor.mjs --route <route>`. Fix every ERROR it reports, rerun until it prints `Ready.`, and apply its recommended shard count to `browser.shards`.
 
@@ -92,7 +94,8 @@ Browser stages run through `SKILL_DIR/scripts/parallel.mjs`, which caps shards b
 ### screenshots
 
 1. `CAPTURE_CONFIG=<config> node SKILL_DIR/scripts/parallel.mjs screenshots.mjs`
-2. Verify every discovered route has files and no manifest row says `error`. Rerun failed routes with `ROUTES=`.
+2. Merge the ordered shard manifests with `CAPTURE_MANIFESTS=<manifest-0.tsv,manifest-1.tsv,...> CAPTURE_FINAL_MANIFEST=<screenshots>/manifest-final.tsv node SKILL_DIR/scripts/merge-screenshot-manifests.mjs`. Successful retry manifests go last so they supersede earlier failures.
+3. The merge must exit 0. Verify every discovered route has files and no final row is truncated or starts with `error:`. Rerun failed routes with `ROUTES=` and merge the retry manifests last.
 
 ### library (follow guide 02 exactly)
 

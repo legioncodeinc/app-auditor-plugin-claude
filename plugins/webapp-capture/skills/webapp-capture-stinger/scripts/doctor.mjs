@@ -1,7 +1,7 @@
 // Preflight for webapp-capture. Checks the environment and config before any run and
 // prints exactly what to fix. Exit 0 = ready, 1 = blocking problems, 2 = usage error.
 // Designed by Legion Code Inc.
-// Usage: [CAPTURE_CONFIG=...] node doctor.mjs [--route demo|library|audit] [--json]
+// Usage: [CAPTURE_CONFIG=...] node doctor.mjs [--route screenshots|demo|library|audit] [--json]
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -12,15 +12,16 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
 const json = args.includes("--json");
 const routeArg = args.includes("--route") ? args[args.indexOf("--route") + 1] : "all";
-if (!["demo", "library", "audit", "all"].includes(routeArg)) { console.error("--route must be demo, library, audit, or all"); process.exit(2); }
+if (!["screenshots", "demo", "library", "audit", "all"].includes(routeArg)) { console.error("--route must be screenshots, demo, library, audit, or all"); process.exit(2); }
 
 const checks = [];
 const add = (level, name, detail, fix = "") => checks.push({ level, name, detail, fix });
 const has = (bin) => { try { execFileSync(bin, ["-version"], { stdio: "ignore" }); return true; } catch { try { execFileSync(bin, ["--version"], { stdio: "ignore" }); return true; } catch { return false; } } };
 
 // Node
-const major = Number(process.versions.node.split(".")[0]);
-major >= 20 ? add("ok", "node", `v${process.versions.node}`) : add("error", "node", `v${process.versions.node} is too old`, "Install Node 20 or newer");
+const [major, minor] = process.versions.node.split(".").map(Number);
+const supportedNode = major > 20 || (major === 20 && minor >= 9);
+supportedNode ? add("ok", "node", `v${process.versions.node}`) : add("error", "node", `v${process.versions.node} is too old`, "Install Node 20.9 or newer");
 
 // Dependencies
 const resolveDep = async (name) => { try { await import(name); return true; } catch { return false; } };

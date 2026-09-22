@@ -10,6 +10,20 @@
     "storageState": ".capture/auth.json",
     "$comment": "A human logs in once in a visible window (scripts/save-session.mjs). The agent never types credentials."
   },
+  "onboarding": {
+    "$comment": "Optional explicitly approved local or seeded onboarding preflight. Screenshots each step before executing its declared actions. Disabled by default.",
+    "enabled": false,
+    "approved": false,
+    "environment": "local",
+    "path": "/onboarding",
+    "skipWhenApiHasItems": null,
+    "outputSubdir": "_onboarding",
+    "denyPattern": null,
+    "timeoutMs": 120000,
+    "whenVisible": { "role": "heading", "name": "Welcome" },
+    "completeWhenVisible": { "role": "heading", "name": "Dashboard" },
+    "steps": []
+  },
   "browser": {
     "executablePath": null,
     "viewport": {
@@ -32,9 +46,11 @@
     }
   },
   "routes": {
-    "$comment": "discover: nav-links | list. With nav-links, every same-origin <a href> on startPath is a route.",
+    "$comment": "discover: nav-links | crawl-links | list. crawl-links recursively follows same-origin anchors up to maxRoutes.",
     "discover": "nav-links",
     "startPath": "/",
+    "maxRoutes": 200,
+    "includePattern": null,
     "list": [],
     "exclude": [
       "/logout",
@@ -45,6 +61,7 @@
   "tabs": {
     "selector": "[role=\"tab\"]",
     "noTabsOnRoutes": [],
+    "noTabsOnRoutePattern": null,
     "notATabLabel": "^(light|dark|system|\\d+\\s*(h|d|days?)|all time)$",
     "$comment": "Tabs that change settings or only filter data are not tabs. Add their routes to noTabsOnRoutes after the first dry run."
   },

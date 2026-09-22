@@ -7,6 +7,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { assertTheme, discoverRoutes, gotoChecked, listTabs, loadConfig, log, openApp, routeSlug, settle, shard, shotOptions, slugify, tabName, withTimeout } from "../lib/common.mjs";
+import { runOnboarding } from "../lib/onboarding.mjs";
 
 const cfg = loadConfig();
 const RAW = process.env.RAW || path.join(cfg.output.inventory, "_raw");
@@ -241,6 +242,9 @@ async function captureState(route, stateName, isFirst) {
 
 let failures = 0;
 try {
+  if (!process.env.SHARDS && !process.env.WEBAPP_CAPTURE_ONBOARDING_DONE) {
+    await runOnboarding(cfg, page, cfg.output.screenshots || path.join(cfg.output.inventory, "screenshots"));
+  }
   let routes = process.env.ROUTES ? process.env.ROUTES.split(",").filter(Boolean) : await discoverRoutes(cfg, page);
   const varsRoute = routes[0]; // CSS variables are captured once, by whichever shard owns the first route
   if (process.env.SHARDS) routes = shard(routes, Number(process.env.SHARDS))[Number(process.env.SHARD || 0)] || [];
@@ -253,8 +257,16 @@ try {
         log(route);
         await captureState(route, base, route === varsRoute);
         for (const t of (await listTabs(cfg, page, route)).filter((x) => !x.selected)) {
+          await gotoChecked(cfg, page, route);
+          const currentTabs = await listTabs(cfg, page, route);
+          const current = currentTabs.find((candidate) => candidate.index === t.index && candidate.label === t.label && !candidate.selected)
+            || currentTabs.find((candidate) => candidate.label === t.label && !candidate.selected);
+          if (!current) {
+            log(`  tab ${t.label}: skipped because it is no longer available from the base route`);
+            continue;
+          }
           const before = page.url();
-          await page.locator(`${cfg.tabs.selector}:visible`).nth(t.index).click({ timeout: 5000 });
+          await page.locator(`${cfg.tabs.selector}:visible`).nth(current.index).click({ timeout: 5000 });
           await settle(page);
           await assertTheme(cfg, page);
           await captureState(route, `${base}__${tabName(before, page.url(), t.label)}`, false);

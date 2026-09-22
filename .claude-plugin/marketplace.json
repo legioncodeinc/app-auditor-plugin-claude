@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Claude plugins designed and built by Legion Code Inc.",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "plugins": [
     {
@@ -14,7 +14,7 @@
       "displayName": "Audit My App with Claude",
       "source": "./plugins/webapp-capture",
       "description": "Capture any live web app: demo videos, screenshot sets, and scripts; a full UI component library with DTCG design tokens, a Claude Design handoff zip, and a shadcn/ui map; visual and code inconsistency audits.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "Legion Code Inc.",
         "url": "https://www.legioncodeinc.com"

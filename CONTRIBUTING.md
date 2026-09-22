@@ -13,7 +13,7 @@ Thanks for helping improve the `webapp-capture` plugin.
 
 Requirements:
 
-- Node.js 20 or newer
+- Node.js 20.9 or newer
 - `zip`
 - Claude Code for plugin validation
 - Chromium and FFmpeg only for capture or demo-video work
@@ -30,6 +30,7 @@ npm ci
 From the repository root:
 
 ```bash
+(cd plugins/webapp-capture/skills/webapp-capture-stinger/scripts && npm test)
 claude plugin validate .
 claude plugin validate ./plugins/webapp-capture
 tools/build-dist.sh

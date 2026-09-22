@@ -33,6 +33,15 @@ Known limits:
 
 Capture is read-only. It navigates and switches views; it never submits.
 
+The sole exception is an optional `onboarding` preflight declared in the capture
+config. It runs only when `onboarding.enabled` and `onboarding.approved` are both
+`true` and `onboarding.environment` is `local` or `seeded`, screenshots every
+step before acting, refuses secret-looking fields, values, and deny-listed
+clicks, and requires the user to authorize the exact setup mutations. The ordinary crawl remains
+read-only after onboarding finishes. Direct screenshot and inventory runs execute
+it in their single browser; `parallel.mjs` executes it once before starting any
+shards, so setup actions are never repeated concurrently.
+
 - **Allowed actions:** `page.goto` to same-origin routes, clicks on `[role=tab]` elements that pass the tab filter, scrolling. These map to safe, idempotent GET-class requests [raw/code--mdn-http-request-methods.md].
 - **Never:** form submits, save/delete/reset/restart/logout buttons, switches, checkboxes, anything that issues POST, PUT, PATCH, or DELETE, which MDN does not classify as safe [raw/code--mdn-http-request-methods.md].
 - **Off-origin block:** `openApp()` installs a `page.route('**/*')` handler that aborts main-frame navigation requests outside `app.origin`. Playwright has no ready-made helper for this; it is assembled from `route.abort()`, `route.request()`, and `isNavigationRequest()` [raw/playwright--network-routing.md]. Popups are closed on open.
@@ -54,7 +63,7 @@ Lesson from the first production run (OmniRoute, 2026-09-15): controls that expo
 
 ## 5. Route discovery and tabs
 
-- `routes.discover: nav-links` collects every same-origin `<a href>` on `startPath` that does not open a new tab. Use `list` for apps whose navigation is not links.
+- `routes.discover: nav-links` collects same-origin `<a href>` values on `startPath` that do not open a new tab. `crawl-links` recursively follows same-origin anchors up to `routes.maxRoutes`. Every discovery mode rejects destructive-looking route segments in addition to the configured `routes.exclude` list. Use `list` for apps whose navigation is not links.
 - Scroll capture targets the largest scrollable region, which in dashboards is usually an inner container, not the window. Screenshots with `fullPage` only cover document scroll [raw/playwright--screenshots.md], so this skill scrolls one viewport at a time instead of relying on `fullPage`.
 - A tab is real only if it is visible, same-origin, not selected on arrival (that state is already the base capture), not on `noTabsOnRoutes`, and its label does not match `notATabLabel` (theme pickers, date ranges, group-by filters).
 

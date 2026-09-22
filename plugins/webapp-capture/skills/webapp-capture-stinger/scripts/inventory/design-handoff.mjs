@@ -116,6 +116,40 @@ if (shotsRoot && fs.existsSync(shotsRoot)) {
     await copyImage(file, path.join(root, "pages", path.basename(file).replace(/-001\.png$/, "")));
     pageCount++;
   }
+  const onboarding = path.join(shotsRoot, "_onboarding");
+  if (fs.existsSync(onboarding)) {
+    for (const file of fs.readdirSync(onboarding).filter((name) => /\.png$/i.test(name)).sort()) {
+      await copyImage(path.join(onboarding, file), path.join(root, "pages", `onboarding-${file.replace(/\.png$/i, "")}`));
+      pageCount++;
+    }
+  }
+}
+
+// Optional project context files, supplied explicitly by the caller. These are
+// copied as evidence only and never discovered from the source tree implicitly.
+const contextFiles = (process.env.HANDOFF_FILES || "").split(",").filter(Boolean).map((file) => path.resolve(file));
+if (contextFiles.length) {
+  fs.mkdirSync(path.join(root, "context"), { recursive: true });
+  const contextNames = new Set();
+  const sensitiveName = /(^|[._-])(env|auth|session|credential|secret|private[-_ ]?key)([._-]|$)|\.(pem|key|p12|pfx)$/i;
+  const allowedExt = new Set([".md", ".txt", ".json", ".yaml", ".yml", ".csv"]);
+  const redactPatterns = (cfg?.redact?.patterns || []).map((pattern) => new RegExp(pattern, "gi"));
+  for (const file of contextFiles) {
+    if (!fs.existsSync(file) || !fs.statSync(file).isFile()) throw new Error(`handoff context file not found: ${file}`);
+    if (fs.lstatSync(file).isSymbolicLink()) throw new Error(`handoff context file cannot be a symbolic link: ${file}`);
+    const name = path.basename(file);
+    if (contextNames.has(name)) throw new Error(`handoff context filenames must be unique: ${name}`);
+    if (sensitiveName.test(name)) throw new Error(`refusing sensitive-looking handoff context file: ${name}`);
+    if (!allowedExt.has(path.extname(name).toLowerCase())) throw new Error(`handoff context file must be text, JSON, YAML, or CSV: ${name}`);
+    if (fs.statSync(file).size > 5 * 1024 * 1024) throw new Error(`handoff context file exceeds 5 MB: ${name}`);
+    const content = fs.readFileSync(file, "utf8");
+    for (const pattern of redactPatterns) {
+      pattern.lastIndex = 0;
+      if (pattern.test(content)) throw new Error(`handoff context file matches a configured redaction pattern: ${name}`);
+    }
+    fs.writeFileSync(path.join(root, "context", name), content);
+    contextNames.add(name);
+  }
 }
 
 // 5) Assets, and the shadcn/ui map when one has been generated.
