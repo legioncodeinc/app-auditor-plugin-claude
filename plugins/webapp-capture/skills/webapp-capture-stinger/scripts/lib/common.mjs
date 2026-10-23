@@ -79,6 +79,9 @@ export function loadConfig(configPath = process.env.CAPTURE_CONFIG) {
   const rel = (p) => (p && !path.isAbsolute(p) ? path.join(base, p) : p);
   cfg.__dir = base;
   cfg.__path = abs;
+  // Main-navigation discovery is the default: it starts from routes.startPath, the real landing page.
+  if (cfg.routes && typeof cfg.routes === "object") cfg.routes.discover ??= "nav-links";
+  cfg.__rawOutput = { ...(cfg.output || {}) };
   validateConfig(cfg);
   cfg.auth.storageState = rel(cfg.auth.storageState);
   for (const k of Object.keys(cfg.output || {})) cfg.output[k] = rel(cfg.output[k]);
@@ -86,6 +89,28 @@ export function loadConfig(configPath = process.env.CAPTURE_CONFIG) {
   cfg.redact ??= { patterns: [] };
   cfg.redact.maskSelectors ??= [];
   return cfg;
+}
+
+/**
+ * Output paths are relative to the config file. Writing "library/design/demo" in a config that
+ * already lives in library/design nests a second copy (library/design/library/design/demo).
+ * Returns one warning per output key whose path repeats the tail of the config folder.
+ */
+export function nestedOutputPaths(cfgDir, rawOutput = {}) {
+  const dirParts = path.resolve(cfgDir).split(path.sep).filter(Boolean);
+  const warnings = [];
+  for (const [key, raw] of Object.entries(rawOutput)) {
+    if (typeof raw !== "string" || path.isAbsolute(raw)) continue;
+    const rel = path.normalize(raw).split(/[\\/]+/).filter((p) => p && p !== ".");
+    for (let k = Math.min(dirParts.length, rel.length); k >= 1; k--) {
+      const tail = dirParts.slice(-k);
+      if (tail.every((part, i) => part === rel[i])) {
+        warnings.push({ key, raw, resolved: path.join(cfgDir, raw), repeated: tail.join("/"), suggested: rel.slice(k).join("/") || "." });
+        break;
+      }
+    }
+  }
+  return warnings;
 }
 
 /** Memory the OS can hand to new processes, in GB. os.freemem() undercounts on macOS (it ignores reclaimable cache). */
@@ -176,9 +201,11 @@ export async function openApp(cfg, { headless = true, recordVideo, slowMo } = {}
   return { browser, context, page };
 }
 
+/** idleMs <= 0 skips networkidle. Realtime pages (polling, long-poll, streams) never go idle,
+ * and in Playwright a timeout of 0 means wait forever, so demos pass 0 and use waitFor actions. */
 export async function settle(page, idleMs = 8000, extraMs = 1200) {
   await page.waitForLoadState("domcontentloaded").catch(() => {});
-  await page.waitForLoadState("networkidle", { timeout: idleMs }).catch(() => {});
+  if (idleMs > 0) await page.waitForLoadState("networkidle", { timeout: idleMs }).catch(() => {});
   await page.waitForTimeout(extraMs);
 }
 

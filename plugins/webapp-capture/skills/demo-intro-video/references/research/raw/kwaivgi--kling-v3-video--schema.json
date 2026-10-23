@@ -1,0 +1,858 @@
+{
+  "model": "kwaivgi/kling-v3-video",
+  "source": "https://replicate.com/kwaivgi/kling-v3-video/api/schema",
+  "fetched_at": "2026-10-11T00:24:51.693764+00:00",
+  "version": "cf174169c6b4ea73815a1761e4fe1b63a78fab5cb484672b521f00c69388e1d8",
+  "openapi_schema": {
+    "info": {
+      "title": "Cog",
+      "version": "0.1.0"
+    },
+    "paths": {
+      "/": {
+        "get": {
+          "summary": "Root",
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              },
+              "description": "Successful Response"
+            }
+          },
+          "operationId": "root__get"
+        }
+      },
+      "/predictions": {
+        "post": {
+          "summary": "Predict",
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "title": "PredictionResponse",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "title": "Id"
+                      },
+                      "logs": {
+                        "type": "string",
+                        "title": "Logs"
+                      },
+                      "error": {
+                        "type": "string",
+                        "title": "Error"
+                      },
+                      "input": {
+                        "type": "object",
+                        "title": "Input",
+                        "required": [
+                          "prompt"
+                        ],
+                        "properties": {
+                          "mode": {
+                            "enum": [
+                              "standard",
+                              "pro",
+                              "4k"
+                            ],
+                            "type": "string",
+                            "title": "mode",
+                            "description": "'standard' generates 720p, 'pro' generates 1080p, '4k' generates 4K.",
+                            "default": "pro",
+                            "x-order": 4
+                          },
+                          "prompt": {
+                            "type": "string",
+                            "title": "Prompt",
+                            "x-order": 0,
+                            "description": "Text prompt for video generation. Max 2500 characters."
+                          },
+                          "duration": {
+                            "type": "integer",
+                            "title": "Duration",
+                            "default": 5,
+                            "maximum": 15,
+                            "minimum": 3,
+                            "x-order": 6,
+                            "description": "Video duration in seconds."
+                          },
+                          "end_image": {
+                            "type": "string",
+                            "title": "End Image",
+                            "format": "uri",
+                            "x-order": 3,
+                            "nullable": true,
+                            "description": "Last frame image. Requires start_image. Supports .jpg/.jpeg/.png, max 10MB, min 300px."
+                          },
+                          "start_image": {
+                            "type": "string",
+                            "title": "Start Image",
+                            "format": "uri",
+                            "x-order": 2,
+                            "nullable": true,
+                            "description": "First frame image. Supports .jpg/.jpeg/.png, max 10MB, min 300px, aspect ratio 1:2.5 to 2.5:1."
+                          },
+                          "aspect_ratio": {
+                            "enum": [
+                              "16:9",
+                              "9:16",
+                              "1:1"
+                            ],
+                            "type": "string",
+                            "title": "aspect_ratio",
+                            "description": "Aspect ratio. Ignored when start_image is provided.",
+                            "default": "16:9",
+                            "x-order": 5
+                          },
+                          "multi_prompt": {
+                            "type": "string",
+                            "title": "Multi Prompt",
+                            "x-order": 8,
+                            "nullable": true,
+                            "description": "JSON array of shot definitions for multi-shot mode. Each shot: {\"prompt\": \"...\", \"duration\": N}. Max 6 shots, min 1s per shot, total must equal duration."
+                          },
+                          "generate_audio": {
+                            "type": "boolean",
+                            "title": "Generate Audio",
+                            "default": false,
+                            "x-order": 7,
+                            "description": "Generate native audio for the video."
+                          },
+                          "negative_prompt": {
+                            "type": "string",
+                            "title": "Negative Prompt",
+                            "default": "",
+                            "x-order": 1,
+                            "description": "Things you do not want to see in the video. Max 2500 characters."
+                          }
+                        }
+                      },
+                      "output": {
+                        "type": "string",
+                        "title": "Output",
+                        "format": "uri"
+                      },
+                      "status": {
+                        "type": "string",
+                        "title": "Status"
+                      },
+                      "metrics": {
+                        "type": "object",
+                        "title": "Metrics"
+                      },
+                      "version": {
+                        "type": "string",
+                        "title": "Version"
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "title": "Created At",
+                        "format": "date-time"
+                      },
+                      "started_at": {
+                        "type": "string",
+                        "title": "Started At",
+                        "format": "date-time"
+                      },
+                      "completed_at": {
+                        "type": "string",
+                        "title": "Completed At",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              },
+              "description": "Successful Response"
+            },
+            "422": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "title": "HTTPValidationError",
+                    "properties": {
+                      "detail": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "title": "ValidationError",
+                          "required": [
+                            "loc",
+                            "msg",
+                            "type"
+                          ],
+                          "properties": {
+                            "loc": {
+                              "type": "array",
+                              "items": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "integer"
+                                  }
+                                ]
+                              },
+                              "title": "Location"
+                            },
+                            "msg": {
+                              "type": "string",
+                              "title": "Message"
+                            },
+                            "type": {
+                              "type": "string",
+                              "title": "Error Type"
+                            }
+                          }
+                        },
+                        "title": "Detail"
+                      }
+                    }
+                  }
+                }
+              },
+              "description": "Validation Error"
+            }
+          },
+          "description": "Run a single prediction on the model",
+          "operationId": "predict_predictions_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "PredictionRequest",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "title": "Id"
+                    },
+                    "input": {
+                      "type": "object",
+                      "title": "Input",
+                      "required": [
+                        "prompt"
+                      ],
+                      "properties": {
+                        "mode": {
+                          "enum": [
+                            "standard",
+                            "pro",
+                            "4k"
+                          ],
+                          "type": "string",
+                          "title": "mode",
+                          "description": "'standard' generates 720p, 'pro' generates 1080p, '4k' generates 4K.",
+                          "default": "pro",
+                          "x-order": 4
+                        },
+                        "prompt": {
+                          "type": "string",
+                          "title": "Prompt",
+                          "x-order": 0,
+                          "description": "Text prompt for video generation. Max 2500 characters."
+                        },
+                        "duration": {
+                          "type": "integer",
+                          "title": "Duration",
+                          "default": 5,
+                          "maximum": 15,
+                          "minimum": 3,
+                          "x-order": 6,
+                          "description": "Video duration in seconds."
+                        },
+                        "end_image": {
+                          "type": "string",
+                          "title": "End Image",
+                          "format": "uri",
+                          "x-order": 3,
+                          "nullable": true,
+                          "description": "Last frame image. Requires start_image. Supports .jpg/.jpeg/.png, max 10MB, min 300px."
+                        },
+                        "start_image": {
+                          "type": "string",
+                          "title": "Start Image",
+                          "format": "uri",
+                          "x-order": 2,
+                          "nullable": true,
+                          "description": "First frame image. Supports .jpg/.jpeg/.png, max 10MB, min 300px, aspect ratio 1:2.5 to 2.5:1."
+                        },
+                        "aspect_ratio": {
+                          "enum": [
+                            "16:9",
+                            "9:16",
+                            "1:1"
+                          ],
+                          "type": "string",
+                          "title": "aspect_ratio",
+                          "description": "Aspect ratio. Ignored when start_image is provided.",
+                          "default": "16:9",
+                          "x-order": 5
+                        },
+                        "multi_prompt": {
+                          "type": "string",
+                          "title": "Multi Prompt",
+                          "x-order": 8,
+                          "nullable": true,
+                          "description": "JSON array of shot definitions for multi-shot mode. Each shot: {\"prompt\": \"...\", \"duration\": N}. Max 6 shots, min 1s per shot, total must equal duration."
+                        },
+                        "generate_audio": {
+                          "type": "boolean",
+                          "title": "Generate Audio",
+                          "default": false,
+                          "x-order": 7,
+                          "description": "Generate native audio for the video."
+                        },
+                        "negative_prompt": {
+                          "type": "string",
+                          "title": "Negative Prompt",
+                          "default": "",
+                          "x-order": 1,
+                          "description": "Things you do not want to see in the video. Max 2500 characters."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/health-check": {
+        "get": {
+          "summary": "Healthcheck",
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              },
+              "description": "Successful Response"
+            }
+          },
+          "operationId": "healthcheck_health_check_get"
+        }
+      },
+      "/predictions/{prediction_id}/cancel": {
+        "post": {
+          "summary": "Cancel",
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              },
+              "description": "Successful Response"
+            },
+            "422": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "title": "HTTPValidationError",
+                    "properties": {
+                      "detail": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "title": "ValidationError",
+                          "required": [
+                            "loc",
+                            "msg",
+                            "type"
+                          ],
+                          "properties": {
+                            "loc": {
+                              "type": "array",
+                              "items": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "integer"
+                                  }
+                                ]
+                              },
+                              "title": "Location"
+                            },
+                            "msg": {
+                              "type": "string",
+                              "title": "Message"
+                            },
+                            "type": {
+                              "type": "string",
+                              "title": "Error Type"
+                            }
+                          }
+                        },
+                        "title": "Detail"
+                      }
+                    }
+                  }
+                }
+              },
+              "description": "Validation Error"
+            }
+          },
+          "parameters": [
+            {
+              "in": "path",
+              "name": "prediction_id",
+              "schema": {
+                "type": "string",
+                "title": "Prediction Id"
+              },
+              "required": true
+            }
+          ],
+          "operationId": "cancel_predictions__prediction_id__cancel_post"
+        }
+      }
+    },
+    "openapi": "3.0.2",
+    "components": {
+      "schemas": {
+        "mode": {
+          "enum": [
+            "standard",
+            "pro",
+            "4k"
+          ],
+          "type": "string",
+          "title": "mode",
+          "description": "An enumeration."
+        },
+        "Input": {
+          "type": "object",
+          "title": "Input",
+          "required": [
+            "prompt"
+          ],
+          "properties": {
+            "mode": {
+              "enum": [
+                "standard",
+                "pro",
+                "4k"
+              ],
+              "type": "string",
+              "title": "mode",
+              "description": "'standard' generates 720p, 'pro' generates 1080p, '4k' generates 4K.",
+              "default": "pro",
+              "x-order": 4
+            },
+            "prompt": {
+              "type": "string",
+              "title": "Prompt",
+              "x-order": 0,
+              "description": "Text prompt for video generation. Max 2500 characters."
+            },
+            "duration": {
+              "type": "integer",
+              "title": "Duration",
+              "default": 5,
+              "maximum": 15,
+              "minimum": 3,
+              "x-order": 6,
+              "description": "Video duration in seconds."
+            },
+            "end_image": {
+              "type": "string",
+              "title": "End Image",
+              "format": "uri",
+              "x-order": 3,
+              "nullable": true,
+              "description": "Last frame image. Requires start_image. Supports .jpg/.jpeg/.png, max 10MB, min 300px."
+            },
+            "start_image": {
+              "type": "string",
+              "title": "Start Image",
+              "format": "uri",
+              "x-order": 2,
+              "nullable": true,
+              "description": "First frame image. Supports .jpg/.jpeg/.png, max 10MB, min 300px, aspect ratio 1:2.5 to 2.5:1."
+            },
+            "aspect_ratio": {
+              "enum": [
+                "16:9",
+                "9:16",
+                "1:1"
+              ],
+              "type": "string",
+              "title": "aspect_ratio",
+              "description": "Aspect ratio. Ignored when start_image is provided.",
+              "default": "16:9",
+              "x-order": 5
+            },
+            "multi_prompt": {
+              "type": "string",
+              "title": "Multi Prompt",
+              "x-order": 8,
+              "nullable": true,
+              "description": "JSON array of shot definitions for multi-shot mode. Each shot: {\"prompt\": \"...\", \"duration\": N}. Max 6 shots, min 1s per shot, total must equal duration."
+            },
+            "generate_audio": {
+              "type": "boolean",
+              "title": "Generate Audio",
+              "default": false,
+              "x-order": 7,
+              "description": "Generate native audio for the video."
+            },
+            "negative_prompt": {
+              "type": "string",
+              "title": "Negative Prompt",
+              "default": "",
+              "x-order": 1,
+              "description": "Things you do not want to see in the video. Max 2500 characters."
+            }
+          }
+        },
+        "Output": {
+          "type": "string",
+          "title": "Output",
+          "format": "uri"
+        },
+        "Status": {
+          "enum": [
+            "starting",
+            "processing",
+            "succeeded",
+            "canceled",
+            "failed"
+          ],
+          "type": "string",
+          "title": "Status",
+          "description": "An enumeration."
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1"
+          ],
+          "type": "string",
+          "title": "aspect_ratio",
+          "description": "An enumeration."
+        },
+        "ValidationError": {
+          "type": "object",
+          "title": "ValidationError",
+          "required": [
+            "loc",
+            "msg",
+            "type"
+          ],
+          "properties": {
+            "loc": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ]
+              },
+              "title": "Location"
+            },
+            "msg": {
+              "type": "string",
+              "title": "Message"
+            },
+            "type": {
+              "type": "string",
+              "title": "Error Type"
+            }
+          }
+        },
+        "PredictionRequest": {
+          "type": "object",
+          "title": "PredictionRequest",
+          "properties": {
+            "id": {
+              "type": "string",
+              "title": "Id"
+            },
+            "input": {
+              "type": "object",
+              "title": "Input",
+              "required": [
+                "prompt"
+              ],
+              "properties": {
+                "mode": {
+                  "enum": [
+                    "standard",
+                    "pro",
+                    "4k"
+                  ],
+                  "type": "string",
+                  "title": "mode",
+                  "description": "'standard' generates 720p, 'pro' generates 1080p, '4k' generates 4K.",
+                  "default": "pro",
+                  "x-order": 4
+                },
+                "prompt": {
+                  "type": "string",
+                  "title": "Prompt",
+                  "x-order": 0,
+                  "description": "Text prompt for video generation. Max 2500 characters."
+                },
+                "duration": {
+                  "type": "integer",
+                  "title": "Duration",
+                  "default": 5,
+                  "maximum": 15,
+                  "minimum": 3,
+                  "x-order": 6,
+                  "description": "Video duration in seconds."
+                },
+                "end_image": {
+                  "type": "string",
+                  "title": "End Image",
+                  "format": "uri",
+                  "x-order": 3,
+                  "nullable": true,
+                  "description": "Last frame image. Requires start_image. Supports .jpg/.jpeg/.png, max 10MB, min 300px."
+                },
+                "start_image": {
+                  "type": "string",
+                  "title": "Start Image",
+                  "format": "uri",
+                  "x-order": 2,
+                  "nullable": true,
+                  "description": "First frame image. Supports .jpg/.jpeg/.png, max 10MB, min 300px, aspect ratio 1:2.5 to 2.5:1."
+                },
+                "aspect_ratio": {
+                  "enum": [
+                    "16:9",
+                    "9:16",
+                    "1:1"
+                  ],
+                  "type": "string",
+                  "title": "aspect_ratio",
+                  "description": "Aspect ratio. Ignored when start_image is provided.",
+                  "default": "16:9",
+                  "x-order": 5
+                },
+                "multi_prompt": {
+                  "type": "string",
+                  "title": "Multi Prompt",
+                  "x-order": 8,
+                  "nullable": true,
+                  "description": "JSON array of shot definitions for multi-shot mode. Each shot: {\"prompt\": \"...\", \"duration\": N}. Max 6 shots, min 1s per shot, total must equal duration."
+                },
+                "generate_audio": {
+                  "type": "boolean",
+                  "title": "Generate Audio",
+                  "default": false,
+                  "x-order": 7,
+                  "description": "Generate native audio for the video."
+                },
+                "negative_prompt": {
+                  "type": "string",
+                  "title": "Negative Prompt",
+                  "default": "",
+                  "x-order": 1,
+                  "description": "Things you do not want to see in the video. Max 2500 characters."
+                }
+              }
+            }
+          }
+        },
+        "PredictionResponse": {
+          "type": "object",
+          "title": "PredictionResponse",
+          "properties": {
+            "id": {
+              "type": "string",
+              "title": "Id"
+            },
+            "logs": {
+              "type": "string",
+              "title": "Logs"
+            },
+            "error": {
+              "type": "string",
+              "title": "Error"
+            },
+            "input": {
+              "type": "object",
+              "title": "Input",
+              "required": [
+                "prompt"
+              ],
+              "properties": {
+                "mode": {
+                  "enum": [
+                    "standard",
+                    "pro",
+                    "4k"
+                  ],
+                  "type": "string",
+                  "title": "mode",
+                  "description": "'standard' generates 720p, 'pro' generates 1080p, '4k' generates 4K.",
+                  "default": "pro",
+                  "x-order": 4
+                },
+                "prompt": {
+                  "type": "string",
+                  "title": "Prompt",
+                  "x-order": 0,
+                  "description": "Text prompt for video generation. Max 2500 characters."
+                },
+                "duration": {
+                  "type": "integer",
+                  "title": "Duration",
+                  "default": 5,
+                  "maximum": 15,
+                  "minimum": 3,
+                  "x-order": 6,
+                  "description": "Video duration in seconds."
+                },
+                "end_image": {
+                  "type": "string",
+                  "title": "End Image",
+                  "format": "uri",
+                  "x-order": 3,
+                  "nullable": true,
+                  "description": "Last frame image. Requires start_image. Supports .jpg/.jpeg/.png, max 10MB, min 300px."
+                },
+                "start_image": {
+                  "type": "string",
+                  "title": "Start Image",
+                  "format": "uri",
+                  "x-order": 2,
+                  "nullable": true,
+                  "description": "First frame image. Supports .jpg/.jpeg/.png, max 10MB, min 300px, aspect ratio 1:2.5 to 2.5:1."
+                },
+                "aspect_ratio": {
+                  "enum": [
+                    "16:9",
+                    "9:16",
+                    "1:1"
+                  ],
+                  "type": "string",
+                  "title": "aspect_ratio",
+                  "description": "Aspect ratio. Ignored when start_image is provided.",
+                  "default": "16:9",
+                  "x-order": 5
+                },
+                "multi_prompt": {
+                  "type": "string",
+                  "title": "Multi Prompt",
+                  "x-order": 8,
+                  "nullable": true,
+                  "description": "JSON array of shot definitions for multi-shot mode. Each shot: {\"prompt\": \"...\", \"duration\": N}. Max 6 shots, min 1s per shot, total must equal duration."
+                },
+                "generate_audio": {
+                  "type": "boolean",
+                  "title": "Generate Audio",
+                  "default": false,
+                  "x-order": 7,
+                  "description": "Generate native audio for the video."
+                },
+                "negative_prompt": {
+                  "type": "string",
+                  "title": "Negative Prompt",
+                  "default": "",
+                  "x-order": 1,
+                  "description": "Things you do not want to see in the video. Max 2500 characters."
+                }
+              }
+            },
+            "output": {
+              "type": "string",
+              "title": "Output",
+              "format": "uri"
+            },
+            "status": {
+              "type": "string",
+              "title": "Status"
+            },
+            "metrics": {
+              "type": "object",
+              "title": "Metrics"
+            },
+            "version": {
+              "type": "string",
+              "title": "Version"
+            },
+            "created_at": {
+              "type": "string",
+              "title": "Created At",
+              "format": "date-time"
+            },
+            "started_at": {
+              "type": "string",
+              "title": "Started At",
+              "format": "date-time"
+            },
+            "completed_at": {
+              "type": "string",
+              "title": "Completed At",
+              "format": "date-time"
+            }
+          }
+        },
+        "HTTPValidationError": {
+          "type": "object",
+          "title": "HTTPValidationError",
+          "properties": {
+            "detail": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "title": "ValidationError",
+                "required": [
+                  "loc",
+                  "msg",
+                  "type"
+                ],
+                "properties": {
+                  "loc": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "title": "Location"
+                  },
+                  "msg": {
+                    "type": "string",
+                    "title": "Message"
+                  },
+                  "type": {
+                    "type": "string",
+                    "title": "Error Type"
+                  }
+                }
+              },
+              "title": "Detail"
+            }
+          }
+        }
+      }
+    }
+  }
+}

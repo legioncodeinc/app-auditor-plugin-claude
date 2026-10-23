@@ -1,0 +1,102 @@
+{
+  "model": "kwaivgi/kling-v3-video",
+  "source": "https://api.replicate.com/v1/models/kwaivgi/kling-v3-video",
+  "fetched_at": "2026-10-11T00:49:26.881392+00:00",
+  "source_type": "Authenticated official model API; dereferenced input subset",
+  "version": "cadb27bd609b3432e7989ce823fb107570335cd165d83f3bddd26da045944ed3",
+  "input_schema": {
+    "type": "object",
+    "title": "Input",
+    "required": [
+      "prompt"
+    ],
+    "properties": {
+      "mode": {
+        "allOf": [
+          {
+            "enum": [
+              "standard",
+              "pro",
+              "4k"
+            ],
+            "type": "string",
+            "title": "mode",
+            "description": "An enumeration."
+          }
+        ],
+        "default": "pro",
+        "x-order": 4,
+        "description": "'standard' generates 720p, 'pro' generates 1080p, '4k' generates 4K."
+      },
+      "prompt": {
+        "type": "string",
+        "title": "Prompt",
+        "x-order": 0,
+        "description": "Text prompt for video generation. Max 2500 characters."
+      },
+      "duration": {
+        "type": "integer",
+        "title": "Duration",
+        "default": 5,
+        "maximum": 15,
+        "minimum": 3,
+        "x-order": 6,
+        "description": "Video duration in seconds."
+      },
+      "end_image": {
+        "type": "string",
+        "title": "End Image",
+        "format": "uri",
+        "x-order": 3,
+        "nullable": true,
+        "description": "Last frame image. Requires start_image. Supports .jpg/.jpeg/.png, max 10MB, min 300px."
+      },
+      "start_image": {
+        "type": "string",
+        "title": "Start Image",
+        "format": "uri",
+        "x-order": 2,
+        "nullable": true,
+        "description": "First frame image. Supports .jpg/.jpeg/.png, max 10MB, min 300px, aspect ratio 1:2.5 to 2.5:1."
+      },
+      "aspect_ratio": {
+        "allOf": [
+          {
+            "enum": [
+              "16:9",
+              "9:16",
+              "1:1"
+            ],
+            "type": "string",
+            "title": "aspect_ratio",
+            "description": "An enumeration."
+          }
+        ],
+        "default": "16:9",
+        "x-order": 5,
+        "description": "Aspect ratio. Ignored when start_image is provided."
+      },
+      "multi_prompt": {
+        "type": "string",
+        "title": "Multi Prompt",
+        "x-order": 8,
+        "nullable": true,
+        "description": "JSON array of shot definitions for multi-shot mode. Each shot: {\"prompt\": \"...\", \"duration\": N}. Max 6 shots, min 1s per shot, total must equal duration."
+      },
+      "generate_audio": {
+        "type": "boolean",
+        "title": "Generate Audio",
+        "default": false,
+        "x-order": 7,
+        "description": "Generate native audio for the video."
+      },
+      "negative_prompt": {
+        "type": "string",
+        "title": "Negative Prompt",
+        "default": "",
+        "x-order": 1,
+        "description": "Things you do not want to see in the video. Max 2500 characters."
+      }
+    }
+  }
+}

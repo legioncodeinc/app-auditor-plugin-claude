@@ -1,0 +1,28 @@
+{
+  "name": "webapp-capture",
+  "version": "2.0.0",
+  "description": "Finish product demos recorded by Webapp Capture: ElevenLabs voiceover, Replicate or free B-roll intro video, and the final ffmpeg stitch.",
+  "author": {
+    "name": "Legion Code Inc."
+  },
+  "license": "AGPL-3.0-or-later",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Webapp Capture Video Studio",
+    "shortDescription": "Finish Claude-recorded demos: voiceover, intro video, final cut",
+    "longDescription": "Takes the handoff zip from the Webapp Capture plugin in Claude and finishes the demo: one ElevenLabs voiceover clip per caption line, an intro video from a Replicate model or free stock B-roll, and an ffmpeg stitch with captions. Includes the Replicate video MCP (seven models) and a frame review script. Local desktop workflow; each user supplies their own provider keys and approves paid generations.",
+    "developerName": "Legion Code Inc.",
+    "category": "Creativity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#18A968",
+    "logo": "./assets/legion-logo-light.png",
+    "defaultPrompt": [
+      "Read CHATGPT-INSTRUCTIONS.md in my handoff zip and finish the demo video.",
+      "Check the Replicate video connection without generating anything.",
+      "Find free B-roll for a 5 second intro about scheduling software."
+    ]
+  }
+}

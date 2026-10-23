@@ -61,9 +61,13 @@ const cfgPath = process.env.CAPTURE_CONFIG;
 if (!cfgPath) add("warn", "config", "CAPTURE_CONFIG not set; skipping config checks", `Copy ${path.join(here, "capture.config.example.json")} into the target repo and set CAPTURE_CONFIG`);
 else {
   try {
-    const { loadConfig } = await import("./lib/common.mjs");
+    const { loadConfig, nestedOutputPaths } = await import("./lib/common.mjs");
     const cfg = loadConfig(cfgPath);
     add("ok", "config", `valid: ${cfg.__path}`);
+    // Output paths resolve against the config folder, so repeating that folder nests a copy.
+    for (const w of nestedOutputPaths(cfg.__dir, cfg.__rawOutput)) {
+      add("warn", `output.${w.key}`, `"${w.raw}" repeats the config folder (${w.repeated}) and resolves to ${w.resolved}`, `Paths are relative to the config file. Set output.${w.key} to "${w.suggested}"`);
+    }
     if (cfg.browser.shards > shards) add("warn", "config.shards", `browser.shards=${cfg.browser.shards} exceeds the recommended ${shards} for free memory`, `Set browser.shards to ${shards} or free memory`);
 
     // Reachability
@@ -82,7 +86,7 @@ else {
       const expired = persistent.filter((c) => c.expires < now);
       const soon = persistent.filter((c) => c.expires >= now).sort((a, b) => a.expires - b.expires)[0];
       if (expired.length && expired.length === persistent.length) add("error", "session", "all persistent cookies expired", "Run save-session.mjs again");
-      else add("ok", "session", `${st.cookies.length} cookies; earliest expiry ${soon ? new Date(soon.expires * 1000).toISOString().slice(0, 16) : "session-only"}`);
+      else add("ok", "session", `${st.cookies.length} cookies; earliest cookie expiry ${soon ? `${new Date(soon.expires * 1000).toISOString().slice(0, 16)} (the app may renew it with a refresh token, so it can stay signed in past this time)` : "session-only"}`);
       if (mode !== "600") add("warn", "session.permissions", `mode ${mode}`, `chmod 600 "${cfg.auth.storageState}"`);
       try {
         execFileSync("git", ["check-ignore", "-q", cfg.auth.storageState], { cwd: path.dirname(cfg.auth.storageState), stdio: "ignore" });

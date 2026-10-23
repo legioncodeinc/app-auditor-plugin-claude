@@ -6,7 +6,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DIST="$ROOT/dist"
 VERSION="$(node -e 'console.log(require(process.argv[1]).version)' "$ROOT/plugins/webapp-capture/.claude-plugin/plugin.json")"
-EXCLUDES=(-x '*/node_modules/*' -x '*.DS_Store' -x '*/.capture/*')
+EXCLUDES=(-x '*/node_modules/*' -x '*.DS_Store' -x '*/.capture/*' -x '*/__pycache__/*' -x '*.pyc')
 
 command -v zip >/dev/null || { echo "zip is required" >&2; exit 1; }
 rm -rf "$DIST" && mkdir -p "$DIST"

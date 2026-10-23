@@ -1,7 +1,7 @@
 {
   "name": "webapp-capture",
   "displayName": "Audit My App with Claude",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "Capture any live web app the way users see it: demo videos with screenshots, captions, and scripts; a full UI component library with measured styles and DTCG design tokens; a Claude Design handoff zip; a shadcn/ui migration map; and visual and code inconsistency audits. Designed and built by Legion Code Inc.",
   "author": {
     "name": "Legion Code Inc.",
@@ -23,5 +23,14 @@
     "screenshots",
     "shadcn",
     "ui-audit"
-  ]
+  ],
+  "userConfig": {
+    "replicate_api_token": {
+      "type": "string",
+      "title": "Replicate API token (optional)",
+      "description": "Only needed to generate intro videos with Replicate models. Starts with r8_. Get one at replicate.com/account/api-tokens. Leave blank to use free stock B-roll, or to use a token saved with set_token.py.",
+      "sensitive": true,
+      "required": false
+    }
+  }
 }

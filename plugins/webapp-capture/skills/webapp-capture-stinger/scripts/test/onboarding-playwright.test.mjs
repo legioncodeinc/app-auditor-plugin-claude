@@ -12,6 +12,8 @@ test("approved onboarding runs once against a real Chromium page and captures ev
   let chromium;
   try { ({ chromium } = await import("playwright-core")); }
   catch { t.skip("playwright-core is not installed"); return; }
+  const executablePath = chromiumPath({ browser: {} }) || chromium.executablePath();
+  if (!executablePath || !fs.existsSync(executablePath)) { t.skip("no Chromium build installed (npx playwright install chromium)"); return; }
 
   const server = http.createServer((request, response) => {
     response.setHeader("content-type", "text/html; charset=utf-8");
@@ -28,7 +30,7 @@ test("approved onboarding runs once against a real Chromium page and captures ev
   let browser;
 
   try {
-    browser = await chromium.launch({ executablePath: chromiumPath({ browser: {} }), headless: true });
+    browser = await chromium.launch({ executablePath, headless: true });
     const page = await browser.newPage({ viewport: { width: 800, height: 600 } });
     const cfg = {
       app: { origin },

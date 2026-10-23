@@ -48,7 +48,7 @@ Start from `scripts/capture.config.example.json`. Relative paths resolve against
 | `redact.patterns` | regex[] | Applied to captured text and HTML before anything is written |
 | `redact.maskSelectors` | CSS[] | Regions painted over (Playwright `mask`) in every screenshot and crop |
 | `redact.maskColor` | color | Mask fill, default `#000000` (opaque) |
-| `output.*` | path | screenshots, inventory, demo, audit destinations |
+| `output.*` | path | screenshots, inventory, demo, audit destinations. Relative to the config file: a config in `library/design/` uses `demo`, not `library/design/demo` (doctor warns when a path repeats the config folder) |
 | `ai.describeBatchSize` | number | Groups per describe agent. 10 keeps agents from skipping images |
 | `ai.maxConcurrentAgents` | number | Stay under the harness subagent cap (a cap of 20 was observed in Claude Code) |
 
@@ -60,6 +60,23 @@ screenshot before every step. Set `onboarding.skipWhenApiHasItems` to a
 same-origin JSON array endpoint when an existing seeded account should make the
 preflight idempotently skip.
 
+## Demo plan fields
+
+| Field | Values | Notes |
+|---|---|---|
+| `approved` | boolean | Must be `true`, set only after the user approves the plan |
+| `video.width`, `video.height` | px | Default 1920x1080 |
+| `video.cursor` | boolean | Draws a DOM cursor (headless video has none) |
+| `video.parkAt` | `{x, y}` | Where the cursor rests after click, drag, select, check, and confirm actions; default the bottom right corner |
+| `video.endHoldMs` | ms | Last frame hold written to `assembly.conf`, default 1500 |
+| `video.slowMo` | ms | Default 250 |
+| `narration.wordsPerMinute` | number | Default 140; drives scene holds and `narration/fit.md` |
+| `narration.tts` | `{style, voice, model}` | Eleven v4 clip texts; `style` adds a leading tag such as `[warm]`; no model id is hardcoded |
+| `safety.denyPattern` | regex string | Adds to the built-in deny list, never replaces it |
+| `writes[]` | `{id, scene, description, effect, approved}` | Required for any scene using drag, dragTo, select, check, uncheck, or confirmDialog |
+| `scenes[].actions[]` | see guide 01 | wait, hover, click, type, scroll, select, check, uncheck, drag, dragTo, scrollElement, waitFor, confirmDialog |
+| `scenes[].verify[]` | visible, hidden, text, count | Read-only; required on write scenes |
+
 ## Script map
 
 | Script | Route | Input | Output |
@@ -70,7 +87,14 @@ preflight idempotently skip.
 | `lib/common.mjs` | all | | config validation, browser launch, session restore, masks, route discovery, tab listing, naming, timeouts |
 | `screenshots.mjs` | 1 | config | `<screenshots>/<route>/<route>-001.png`, `<route>__<tab>-001.png`, `manifest.tsv` |
 | `merge-screenshot-manifests.mjs` | 1 | ordered `CAPTURE_MANIFESTS`, optional `CAPTURE_IGNORE_STATE_PATTERN` | Final state ledger where successful retries supersede earlier errors or truncations |
-| `demo/record-demo.mjs` | 1 | config + approved plan JSON | `scenes/*.webm`, `screenshots/*.png`, `captions.vtt`, `script.md`, `make-video.sh` |
+| `demo/record-demo.mjs` | 1 | config + approved plan JSON, `--retake` or `RETAKE=1` | `scenes/*.webm`, `screenshots/*.png`, `failures/*.png`, `timeline.json`, `segments.tsv`, `assembly.conf`, `writes-report.json`, `privacy-review.json`, `captions.vtt`, `titles.srt`, `narration/`, `script.md`, `make-video.sh`; `<output.demo>/<slug>.ledger.json` and `findings.md` |
+| `demo/build-cues.mjs` | 1 | config, `DEMO_DIR` | Rebuilds `captions.vtt`, `titles.srt`, and `narration/` from `timeline.json` and an edited `segments.tsv`; logs overruns |
+| `demo/review-demo.mjs` | 1 | config, `DEMO_DIR`, `EVERY_SECONDS` (default 2) | `review/<scene>-sheet.png` contact sheets and `review/REVIEW.md` with masked text hits |
+| `demo/chatgpt-handoff.mjs` | 1 | config, `DEMO_DIR`, optional `INTRO_BRIEF`, `OUT` | `<demo>-chatgpt-handoff.zip`: silent demo, captions, titles, narration texts and manifest, `INTRO-BRIEF.md`, `CHATGPT-INSTRUCTIONS.md`, `finish_video.py`; refuses unreviewed demos, linked inputs, existing output |
+| `../demo-intro-video/scripts/finish_video.py` | 1 (in ChatGPT) | unzipped handoff, `narration/audio/*`, optional `--intro` | `finished/demo-final.mp4` with intro, voiceover at cue times, shifted captions |
+| `../../mcp/replicate-video/scripts/set_token.py` | intro | run by the user in a terminal | Owner-only token file at `~/.config/webapp-capture/replicate.env`; `--check`, `--where`, `--remove` |
+| `demo/make-video.sh` | 1 | run in the demo folder: `segments.tsv`, `assembly.conf`, `captions.vtt` | `segments/*.mp4`, `demo-silent.mp4`, `demo.mp4`; refuses linked inputs and existing outputs |
+| `lib/demo-plan.mjs`, `lib/narration.mjs`, `lib/demo-actions.mjs`, `lib/demo-guard.mjs`, `lib/demo-cues.mjs` | 1 | | Plan validation and write ledger, timeline and cues, narration fit and Eleven v4 text, browser actions and verify, target guard, cue files |
 | `inventory/extract.mjs` | 2, 3 | config | `_raw/<state>.json` (candidates, stats, CSS vars), `_raw/crops/*.png` |
 | `inventory/cluster.mjs` | 2, 3 | `RAW` | `_raw/groups.json` (exact signatures merged into fuzzy groups) |
 | `inventory/tokens.mjs` | 2, 3 | `RAW`, `DEST` | `tokens-raw.json` (observed values by frequency, CSS variables) |
