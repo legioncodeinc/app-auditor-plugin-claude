@@ -1,0 +1,836 @@
+{
+  "model": "alibaba/wan-3",
+  "source": "https://replicate.com/alibaba/wan-3/api/schema",
+  "fetched_at": "2026-10-11T00:24:51.727844+00:00",
+  "version": "4028a58cba3aac8cd57f875b66a87e05cc1e7eafbc538e6b21d87d8c49d64be8",
+  "openapi_schema": {
+    "info": {
+      "title": "Cog",
+      "version": "0.22.0"
+    },
+    "paths": {
+      "/": {
+        "get": {
+          "summary": "Root",
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              },
+              "description": "Successful Response"
+            }
+          },
+          "operationId": "root__get"
+        }
+      },
+      "/predictions": {
+        "post": {
+          "summary": "Predict",
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "title": "PredictionResponse",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "title": "Id"
+                      },
+                      "logs": {
+                        "type": "string",
+                        "title": "Logs"
+                      },
+                      "error": {
+                        "type": "string",
+                        "title": "Error"
+                      },
+                      "input": {
+                        "type": "object",
+                        "title": "Input",
+                        "required": [
+                          "prompt"
+                        ],
+                        "properties": {
+                          "seed": {
+                            "type": "integer",
+                            "title": "Seed",
+                            "x-order": 7,
+                            "nullable": true,
+                            "description": "Random seed for reproducible generation. Range: 0-2147483647"
+                          },
+                          "image": {
+                            "type": "string",
+                            "title": "Image",
+                            "format": "uri",
+                            "x-order": 1,
+                            "nullable": true,
+                            "description": "Optional first-frame image to animate into a video (jpg/png/bmp/webp, \u226410MB). When provided, the video is generated from this image guided by the prompt."
+                          },
+                          "prompt": {
+                            "type": "string",
+                            "title": "Prompt",
+                            "x-order": 0,
+                            "description": "Text prompt for video generation"
+                          },
+                          "duration": {
+                            "type": "integer",
+                            "title": "Duration",
+                            "default": 5,
+                            "maximum": 30,
+                            "minimum": 2,
+                            "x-order": 5,
+                            "description": "Duration of the generated video in seconds"
+                          },
+                          "resolution": {
+                            "enum": [
+                              "480p",
+                              "720p",
+                              "1080p"
+                            ],
+                            "type": "string",
+                            "title": "resolution",
+                            "description": "Output video resolution",
+                            "default": "1080p",
+                            "x-order": 3
+                          },
+                          "aspect_ratio": {
+                            "enum": [
+                              "adaptive",
+                              "16:9",
+                              "9:16",
+                              "1:1",
+                              "4:3",
+                              "3:4"
+                            ],
+                            "type": "string",
+                            "title": "aspect_ratio",
+                            "description": "Aspect ratio of the generated video. 'adaptive' lets the model choose the best ratio for the prompt. Ignored when an image is provided (the input image's aspect ratio is used).",
+                            "default": "adaptive",
+                            "x-order": 4
+                          },
+                          "negative_prompt": {
+                            "type": "string",
+                            "title": "Negative Prompt",
+                            "default": "",
+                            "x-order": 2,
+                            "description": "Negative prompt \u2014 describes content that should not appear in the video"
+                          },
+                          "enable_prompt_expansion": {
+                            "type": "boolean",
+                            "title": "Enable Prompt Expansion",
+                            "default": true,
+                            "x-order": 6,
+                            "description": "Automatically expand and optimize the prompt for better results. Improves quality for short prompts but increases latency."
+                          }
+                        }
+                      },
+                      "output": {
+                        "type": "string",
+                        "title": "Output",
+                        "format": "uri"
+                      },
+                      "status": {
+                        "type": "string",
+                        "title": "Status"
+                      },
+                      "metrics": {
+                        "type": "object",
+                        "title": "Metrics"
+                      },
+                      "version": {
+                        "type": "string",
+                        "title": "Version"
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "title": "Created At",
+                        "format": "date-time"
+                      },
+                      "started_at": {
+                        "type": "string",
+                        "title": "Started At",
+                        "format": "date-time"
+                      },
+                      "completed_at": {
+                        "type": "string",
+                        "title": "Completed At",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              },
+              "description": "Successful Response"
+            },
+            "422": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "title": "HTTPValidationError",
+                    "properties": {
+                      "detail": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "title": "ValidationError",
+                          "required": [
+                            "loc",
+                            "msg",
+                            "type"
+                          ],
+                          "properties": {
+                            "loc": {
+                              "type": "array",
+                              "items": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "integer"
+                                  }
+                                ]
+                              },
+                              "title": "Location"
+                            },
+                            "msg": {
+                              "type": "string",
+                              "title": "Message"
+                            },
+                            "type": {
+                              "type": "string",
+                              "title": "Error Type"
+                            }
+                          }
+                        },
+                        "title": "Detail"
+                      }
+                    }
+                  }
+                }
+              },
+              "description": "Validation Error"
+            }
+          },
+          "description": "Run a single prediction on the model",
+          "operationId": "predict_predictions_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "PredictionRequest",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "title": "Id"
+                    },
+                    "input": {
+                      "type": "object",
+                      "title": "Input",
+                      "required": [
+                        "prompt"
+                      ],
+                      "properties": {
+                        "seed": {
+                          "type": "integer",
+                          "title": "Seed",
+                          "x-order": 7,
+                          "nullable": true,
+                          "description": "Random seed for reproducible generation. Range: 0-2147483647"
+                        },
+                        "image": {
+                          "type": "string",
+                          "title": "Image",
+                          "format": "uri",
+                          "x-order": 1,
+                          "nullable": true,
+                          "description": "Optional first-frame image to animate into a video (jpg/png/bmp/webp, \u226410MB). When provided, the video is generated from this image guided by the prompt."
+                        },
+                        "prompt": {
+                          "type": "string",
+                          "title": "Prompt",
+                          "x-order": 0,
+                          "description": "Text prompt for video generation"
+                        },
+                        "duration": {
+                          "type": "integer",
+                          "title": "Duration",
+                          "default": 5,
+                          "maximum": 30,
+                          "minimum": 2,
+                          "x-order": 5,
+                          "description": "Duration of the generated video in seconds"
+                        },
+                        "resolution": {
+                          "enum": [
+                            "480p",
+                            "720p",
+                            "1080p"
+                          ],
+                          "type": "string",
+                          "title": "resolution",
+                          "description": "Output video resolution",
+                          "default": "1080p",
+                          "x-order": 3
+                        },
+                        "aspect_ratio": {
+                          "enum": [
+                            "adaptive",
+                            "16:9",
+                            "9:16",
+                            "1:1",
+                            "4:3",
+                            "3:4"
+                          ],
+                          "type": "string",
+                          "title": "aspect_ratio",
+                          "description": "Aspect ratio of the generated video. 'adaptive' lets the model choose the best ratio for the prompt. Ignored when an image is provided (the input image's aspect ratio is used).",
+                          "default": "adaptive",
+                          "x-order": 4
+                        },
+                        "negative_prompt": {
+                          "type": "string",
+                          "title": "Negative Prompt",
+                          "default": "",
+                          "x-order": 2,
+                          "description": "Negative prompt \u2014 describes content that should not appear in the video"
+                        },
+                        "enable_prompt_expansion": {
+                          "type": "boolean",
+                          "title": "Enable Prompt Expansion",
+                          "default": true,
+                          "x-order": 6,
+                          "description": "Automatically expand and optimize the prompt for better results. Improves quality for short prompts but increases latency."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/health-check": {
+        "get": {
+          "summary": "Healthcheck",
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              },
+              "description": "Successful Response"
+            }
+          },
+          "operationId": "healthcheck_health_check_get"
+        }
+      },
+      "/predictions/{prediction_id}/cancel": {
+        "post": {
+          "summary": "Cancel",
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              },
+              "description": "Successful Response"
+            },
+            "422": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "title": "HTTPValidationError",
+                    "properties": {
+                      "detail": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "title": "ValidationError",
+                          "required": [
+                            "loc",
+                            "msg",
+                            "type"
+                          ],
+                          "properties": {
+                            "loc": {
+                              "type": "array",
+                              "items": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "integer"
+                                  }
+                                ]
+                              },
+                              "title": "Location"
+                            },
+                            "msg": {
+                              "type": "string",
+                              "title": "Message"
+                            },
+                            "type": {
+                              "type": "string",
+                              "title": "Error Type"
+                            }
+                          }
+                        },
+                        "title": "Detail"
+                      }
+                    }
+                  }
+                }
+              },
+              "description": "Validation Error"
+            }
+          },
+          "parameters": [
+            {
+              "in": "path",
+              "name": "prediction_id",
+              "schema": {
+                "type": "string",
+                "title": "Prediction Id"
+              },
+              "required": true
+            }
+          ],
+          "operationId": "cancel_predictions__prediction_id__cancel_post"
+        }
+      }
+    },
+    "openapi": "3.0.2",
+    "components": {
+      "schemas": {
+        "Input": {
+          "type": "object",
+          "title": "Input",
+          "required": [
+            "prompt"
+          ],
+          "properties": {
+            "seed": {
+              "type": "integer",
+              "title": "Seed",
+              "x-order": 7,
+              "nullable": true,
+              "description": "Random seed for reproducible generation. Range: 0-2147483647"
+            },
+            "image": {
+              "type": "string",
+              "title": "Image",
+              "format": "uri",
+              "x-order": 1,
+              "nullable": true,
+              "description": "Optional first-frame image to animate into a video (jpg/png/bmp/webp, \u226410MB). When provided, the video is generated from this image guided by the prompt."
+            },
+            "prompt": {
+              "type": "string",
+              "title": "Prompt",
+              "x-order": 0,
+              "description": "Text prompt for video generation"
+            },
+            "duration": {
+              "type": "integer",
+              "title": "Duration",
+              "default": 5,
+              "maximum": 30,
+              "minimum": 2,
+              "x-order": 5,
+              "description": "Duration of the generated video in seconds"
+            },
+            "resolution": {
+              "enum": [
+                "480p",
+                "720p",
+                "1080p"
+              ],
+              "type": "string",
+              "title": "resolution",
+              "description": "Output video resolution",
+              "default": "1080p",
+              "x-order": 3
+            },
+            "aspect_ratio": {
+              "enum": [
+                "adaptive",
+                "16:9",
+                "9:16",
+                "1:1",
+                "4:3",
+                "3:4"
+              ],
+              "type": "string",
+              "title": "aspect_ratio",
+              "description": "Aspect ratio of the generated video. 'adaptive' lets the model choose the best ratio for the prompt. Ignored when an image is provided (the input image's aspect ratio is used).",
+              "default": "adaptive",
+              "x-order": 4
+            },
+            "negative_prompt": {
+              "type": "string",
+              "title": "Negative Prompt",
+              "default": "",
+              "x-order": 2,
+              "description": "Negative prompt \u2014 describes content that should not appear in the video"
+            },
+            "enable_prompt_expansion": {
+              "type": "boolean",
+              "title": "Enable Prompt Expansion",
+              "default": true,
+              "x-order": 6,
+              "description": "Automatically expand and optimize the prompt for better results. Improves quality for short prompts but increases latency."
+            }
+          }
+        },
+        "Output": {
+          "type": "string",
+          "title": "Output",
+          "format": "uri"
+        },
+        "Status": {
+          "enum": [
+            "starting",
+            "processing",
+            "succeeded",
+            "canceled",
+            "failed"
+          ],
+          "type": "string",
+          "title": "Status",
+          "description": "An enumeration."
+        },
+        "resolution": {
+          "enum": [
+            "480p",
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "title": "resolution",
+          "description": "An enumeration."
+        },
+        "aspect_ratio": {
+          "enum": [
+            "adaptive",
+            "16:9",
+            "9:16",
+            "1:1",
+            "4:3",
+            "3:4"
+          ],
+          "type": "string",
+          "title": "aspect_ratio",
+          "description": "An enumeration."
+        },
+        "ValidationError": {
+          "type": "object",
+          "title": "ValidationError",
+          "required": [
+            "loc",
+            "msg",
+            "type"
+          ],
+          "properties": {
+            "loc": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ]
+              },
+              "title": "Location"
+            },
+            "msg": {
+              "type": "string",
+              "title": "Message"
+            },
+            "type": {
+              "type": "string",
+              "title": "Error Type"
+            }
+          }
+        },
+        "PredictionRequest": {
+          "type": "object",
+          "title": "PredictionRequest",
+          "properties": {
+            "id": {
+              "type": "string",
+              "title": "Id"
+            },
+            "input": {
+              "type": "object",
+              "title": "Input",
+              "required": [
+                "prompt"
+              ],
+              "properties": {
+                "seed": {
+                  "type": "integer",
+                  "title": "Seed",
+                  "x-order": 7,
+                  "nullable": true,
+                  "description": "Random seed for reproducible generation. Range: 0-2147483647"
+                },
+                "image": {
+                  "type": "string",
+                  "title": "Image",
+                  "format": "uri",
+                  "x-order": 1,
+                  "nullable": true,
+                  "description": "Optional first-frame image to animate into a video (jpg/png/bmp/webp, \u226410MB). When provided, the video is generated from this image guided by the prompt."
+                },
+                "prompt": {
+                  "type": "string",
+                  "title": "Prompt",
+                  "x-order": 0,
+                  "description": "Text prompt for video generation"
+                },
+                "duration": {
+                  "type": "integer",
+                  "title": "Duration",
+                  "default": 5,
+                  "maximum": 30,
+                  "minimum": 2,
+                  "x-order": 5,
+                  "description": "Duration of the generated video in seconds"
+                },
+                "resolution": {
+                  "enum": [
+                    "480p",
+                    "720p",
+                    "1080p"
+                  ],
+                  "type": "string",
+                  "title": "resolution",
+                  "description": "Output video resolution",
+                  "default": "1080p",
+                  "x-order": 3
+                },
+                "aspect_ratio": {
+                  "enum": [
+                    "adaptive",
+                    "16:9",
+                    "9:16",
+                    "1:1",
+                    "4:3",
+                    "3:4"
+                  ],
+                  "type": "string",
+                  "title": "aspect_ratio",
+                  "description": "Aspect ratio of the generated video. 'adaptive' lets the model choose the best ratio for the prompt. Ignored when an image is provided (the input image's aspect ratio is used).",
+                  "default": "adaptive",
+                  "x-order": 4
+                },
+                "negative_prompt": {
+                  "type": "string",
+                  "title": "Negative Prompt",
+                  "default": "",
+                  "x-order": 2,
+                  "description": "Negative prompt \u2014 describes content that should not appear in the video"
+                },
+                "enable_prompt_expansion": {
+                  "type": "boolean",
+                  "title": "Enable Prompt Expansion",
+                  "default": true,
+                  "x-order": 6,
+                  "description": "Automatically expand and optimize the prompt for better results. Improves quality for short prompts but increases latency."
+                }
+              }
+            }
+          }
+        },
+        "PredictionResponse": {
+          "type": "object",
+          "title": "PredictionResponse",
+          "properties": {
+            "id": {
+              "type": "string",
+              "title": "Id"
+            },
+            "logs": {
+              "type": "string",
+              "title": "Logs"
+            },
+            "error": {
+              "type": "string",
+              "title": "Error"
+            },
+            "input": {
+              "type": "object",
+              "title": "Input",
+              "required": [
+                "prompt"
+              ],
+              "properties": {
+                "seed": {
+                  "type": "integer",
+                  "title": "Seed",
+                  "x-order": 7,
+                  "nullable": true,
+                  "description": "Random seed for reproducible generation. Range: 0-2147483647"
+                },
+                "image": {
+                  "type": "string",
+                  "title": "Image",
+                  "format": "uri",
+                  "x-order": 1,
+                  "nullable": true,
+                  "description": "Optional first-frame image to animate into a video (jpg/png/bmp/webp, \u226410MB). When provided, the video is generated from this image guided by the prompt."
+                },
+                "prompt": {
+                  "type": "string",
+                  "title": "Prompt",
+                  "x-order": 0,
+                  "description": "Text prompt for video generation"
+                },
+                "duration": {
+                  "type": "integer",
+                  "title": "Duration",
+                  "default": 5,
+                  "maximum": 30,
+                  "minimum": 2,
+                  "x-order": 5,
+                  "description": "Duration of the generated video in seconds"
+                },
+                "resolution": {
+                  "enum": [
+                    "480p",
+                    "720p",
+                    "1080p"
+                  ],
+                  "type": "string",
+                  "title": "resolution",
+                  "description": "Output video resolution",
+                  "default": "1080p",
+                  "x-order": 3
+                },
+                "aspect_ratio": {
+                  "enum": [
+                    "adaptive",
+                    "16:9",
+                    "9:16",
+                    "1:1",
+                    "4:3",
+                    "3:4"
+                  ],
+                  "type": "string",
+                  "title": "aspect_ratio",
+                  "description": "Aspect ratio of the generated video. 'adaptive' lets the model choose the best ratio for the prompt. Ignored when an image is provided (the input image's aspect ratio is used).",
+                  "default": "adaptive",
+                  "x-order": 4
+                },
+                "negative_prompt": {
+                  "type": "string",
+                  "title": "Negative Prompt",
+                  "default": "",
+                  "x-order": 2,
+                  "description": "Negative prompt \u2014 describes content that should not appear in the video"
+                },
+                "enable_prompt_expansion": {
+                  "type": "boolean",
+                  "title": "Enable Prompt Expansion",
+                  "default": true,
+                  "x-order": 6,
+                  "description": "Automatically expand and optimize the prompt for better results. Improves quality for short prompts but increases latency."
+                }
+              }
+            },
+            "output": {
+              "type": "string",
+              "title": "Output",
+              "format": "uri"
+            },
+            "status": {
+              "type": "string",
+              "title": "Status"
+            },
+            "metrics": {
+              "type": "object",
+              "title": "Metrics"
+            },
+            "version": {
+              "type": "string",
+              "title": "Version"
+            },
+            "created_at": {
+              "type": "string",
+              "title": "Created At",
+              "format": "date-time"
+            },
+            "started_at": {
+              "type": "string",
+              "title": "Started At",
+              "format": "date-time"
+            },
+            "completed_at": {
+              "type": "string",
+              "title": "Completed At",
+              "format": "date-time"
+            }
+          }
+        },
+        "HTTPValidationError": {
+          "type": "object",
+          "title": "HTTPValidationError",
+          "properties": {
+            "detail": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "title": "ValidationError",
+                "required": [
+                  "loc",
+                  "msg",
+                  "type"
+                ],
+                "properties": {
+                  "loc": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "title": "Location"
+                  },
+                  "msg": {
+                    "type": "string",
+                    "title": "Message"
+                  },
+                  "type": {
+                    "type": "string",
+                    "title": "Error Type"
+                  }
+                }
+              },
+              "title": "Detail"
+            }
+          }
+        }
+      }
+    }
+  }
+}

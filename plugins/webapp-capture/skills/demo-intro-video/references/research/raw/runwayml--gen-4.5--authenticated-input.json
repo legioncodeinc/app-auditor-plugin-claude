@@ -1,0 +1,73 @@
+{
+  "model": "runwayml/gen-4.5",
+  "source": "https://api.replicate.com/v1/models/runwayml/gen-4.5",
+  "fetched_at": "2026-10-11T00:49:26.150949+00:00",
+  "source_type": "Authenticated official model API; dereferenced input subset",
+  "version": "2e10d5ae08888b39ed31c828003f4a5ddc89a7cdec3bc7a9926661e0d22cb034",
+  "input_schema": {
+    "type": "object",
+    "title": "Input",
+    "required": [
+      "prompt"
+    ],
+    "properties": {
+      "seed": {
+        "type": "integer",
+        "title": "Seed",
+        "x-order": 4,
+        "nullable": true,
+        "description": "Random seed. Set for reproducible generation"
+      },
+      "image": {
+        "type": "string",
+        "title": "Image",
+        "format": "uri",
+        "x-order": 1,
+        "nullable": true,
+        "description": "Optional initial image for video generation (first frame). If not provided, video will be generated from text only."
+      },
+      "prompt": {
+        "type": "string",
+        "title": "Prompt",
+        "x-order": 0,
+        "description": "Text prompt for video generation"
+      },
+      "duration": {
+        "allOf": [
+          {
+            "enum": [
+              5,
+              10
+            ],
+            "type": "integer",
+            "title": "duration",
+            "description": "An enumeration."
+          }
+        ],
+        "default": 5,
+        "x-order": 3,
+        "description": "Duration of the output video in seconds"
+      },
+      "aspect_ratio": {
+        "allOf": [
+          {
+            "enum": [
+              "16:9",
+              "9:16",
+              "4:3",
+              "3:4",
+              "1:1",
+              "21:9"
+            ],
+            "type": "string",
+            "title": "aspect_ratio",
+            "description": "An enumeration."
+          }
+        ],
+        "default": "16:9",
+        "x-order": 2,
+        "description": "Video aspect ratio"
+      }
+    }
+  }
+}

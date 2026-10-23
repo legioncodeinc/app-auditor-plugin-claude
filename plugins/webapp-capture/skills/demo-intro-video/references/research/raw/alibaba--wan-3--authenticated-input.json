@@ -1,0 +1,99 @@
+{
+  "model": "alibaba/wan-3",
+  "source": "https://api.replicate.com/v1/models/alibaba/wan-3",
+  "fetched_at": "2026-10-11T00:49:25.975136+00:00",
+  "source_type": "Authenticated official model API; dereferenced input subset",
+  "version": "78e877ac6841ba1fe938f4886243cdac82b2e40e4c29c2cfc977d671aeb0d15b",
+  "input_schema": {
+    "type": "object",
+    "title": "Input",
+    "required": [
+      "prompt"
+    ],
+    "properties": {
+      "seed": {
+        "type": "integer",
+        "title": "Seed",
+        "default": null,
+        "x-order": 7,
+        "nullable": true,
+        "description": "Random seed for reproducible generation. Range: 0-2147483647"
+      },
+      "image": {
+        "type": "string",
+        "title": "Image",
+        "format": "uri",
+        "default": null,
+        "x-order": 1,
+        "nullable": true,
+        "description": "Optional first-frame image to animate into a video (jpg/png/bmp/webp, \u226410MB). When provided, the video is generated from this image guided by the prompt."
+      },
+      "prompt": {
+        "type": "string",
+        "title": "Prompt",
+        "x-order": 0,
+        "description": "Text prompt for video generation"
+      },
+      "duration": {
+        "type": "integer",
+        "title": "Duration",
+        "default": 5,
+        "maximum": 30,
+        "minimum": 2,
+        "x-order": 5,
+        "description": "Duration of the generated video in seconds"
+      },
+      "resolution": {
+        "allOf": [
+          {
+            "enum": [
+              "480p",
+              "720p",
+              "1080p"
+            ],
+            "type": "string",
+            "title": "resolution",
+            "description": "An enumeration."
+          }
+        ],
+        "default": "1080p",
+        "x-order": 3,
+        "description": "Output video resolution"
+      },
+      "aspect_ratio": {
+        "allOf": [
+          {
+            "enum": [
+              "adaptive",
+              "16:9",
+              "9:16",
+              "1:1",
+              "4:3",
+              "3:4"
+            ],
+            "type": "string",
+            "title": "aspect_ratio",
+            "description": "An enumeration."
+          }
+        ],
+        "default": "adaptive",
+        "x-order": 4,
+        "description": "Aspect ratio of the generated video. 'adaptive' lets the model choose the best ratio for the prompt. Ignored when an image is provided (the input image's aspect ratio is used)."
+      },
+      "negative_prompt": {
+        "type": "string",
+        "title": "Negative Prompt",
+        "default": "",
+        "x-order": 2,
+        "description": "Negative prompt \u2014 describes content that should not appear in the video"
+      },
+      "enable_prompt_expansion": {
+        "type": "boolean",
+        "title": "Enable Prompt Expansion",
+        "default": true,
+        "x-order": 6,
+        "description": "Automatically expand and optimize the prompt for better results. Improves quality for short prompts but increases latency."
+      }
+    }
+  }
+}

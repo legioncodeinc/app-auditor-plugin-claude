@@ -10,7 +10,7 @@ metadata:
   hive-bee: webapp-capture-worker-bee
   pair-bee: webapp-capture-worker-bee
   domain: web app capture
-  version: 1.1.0
+  version: 2.0.0
 ---
 
 # Webapp Capture Stinger
@@ -23,11 +23,11 @@ Every path below (`guides/`, `references/`, `scripts/`) is relative to the folde
 
 ## Purpose
 
-Capture a running, authenticated web application from the outside, the way a user sees it, and turn that capture into something a person or another AI can build on. Three routes share one read-only crawler: a narrated-ready demo (video, key screenshots, captions, script), a component library inventory (one folder per unique component with code, measured styles, screenshots, assets, and purpose, plus a ledger and DTCG candidate tokens), and an inconsistency audit (near-duplicate tokens, scale sprawl, component drift, contrast, and the source patterns behind them). It works on any framework because it reads the rendered DOM, not the source.
+Capture a running, authenticated web application from the outside, the way a user sees it, and turn that capture into something a person or another AI can build on. Three routes share one read-only crawler: a narrated-ready demo (video, key screenshots, captions, scene titles, narration timing and Eleven v4 clip texts, with every data change declared, approved, verified, and recorded in a retake ledger), a component library inventory (one folder per unique component with code, measured styles, screenshots, assets, and purpose, plus a ledger and DTCG candidate tokens), and an inconsistency audit (near-duplicate tokens, scale sprawl, component drift, contrast, and the source patterns behind them). It works on any framework because it reads the rendered DOM, not the source.
 
 ## When to use
 
-- "Make a demo video of the app", "record a walkthrough", "screenshot every page", "write a demo script"
+- "Make a demo video of the app", "record a walkthrough", "screenshot every page", "write a demo script", "retake the demo", "time the narration", "write ElevenLabs lines for the demo"
 - "Capture our entire component library", "build a component inventory from the live app", "extract design tokens from the running site", "give my UX AI everything it needs for a token guide"
 - "Find visual inconsistencies", "audit our UI for drift", "which colors should be one token", "find hardcoded colors and one-off values in the code"
 - "Package this for Claude Design", "map our components to shadcn/ui", "migrate this app's UI to shadcn"
@@ -49,7 +49,7 @@ Capture a running, authenticated web application from the outside, the way a use
 3. **Get a session without touching credentials.** Run `scripts/save-session.mjs`; the user logs in in the visible window. Never type passwords, tokens, or keys yourself, and never script it.
 4. **Dry run.** Capture 3 or 4 routes. Check for setting pickers exposed as tabs, theme flips, naming collisions, and blind spots. Update `tabs.noTabsOnRoutes`, `tabs.notATabLabel`, and `routes.exclude`. Reload any settings page a tab click touched and confirm nothing persisted.
 5. **Pick the route** and follow its guide end to end:
-   - Demo, screenshots, script: `guides/01-demo-video-screenshots-script.md`. The demo plan needs the user's approval before recording.
+   - Demo, screenshots, script: `guides/01-demo-video-screenshots-script.md`. The demo plan and every entry in its `writes[]` need the user's approval before recording. Write scenes need read-only `verify` checks. Never pass `--retake` until the user agrees the listed writes may repeat. After recording, read `writes-report.json` and `findings.md`, run `demo/review-demo.mjs` for the privacy review, and run `demo/build-cues.mjs` after any edit to `segments.tsv`. To finish in ChatGPT (ElevenLabs voiceover, intro clip, final stitch), run `demo/chatgpt-handoff.mjs` after the review; ChatGPT then follows the zip's `CHATGPT-INSTRUCTIONS.md` with the `demo-intro-video` skill and the bundled `replicate_video` MCP.
    - Component library: `guides/02-component-library-capture.md`. Pilot the describe and merge stages on the dry-run pages and show the user a sample before running every route.
    - Inconsistencies: `guides/03-inconsistency-audit.md`. Needs only the code stages of route 2 plus the source tree.
    - shadcn/ui map: `guides/04-shadcn-map.md`. Needs a built library; maps every component, new variant, and theme token onto shadcn/ui.
@@ -67,8 +67,8 @@ Capture a running, authenticated web application from the outside, the way a use
 - `guides/04-shadcn-map.md`, load for mapping the captured library onto shadcn/ui components, variants, and theme tokens
 - `references/shadcn-catalog.json`, the valid shadcn/ui components, variants, and theme tokens used to validate maps
 - `references/REFERENCE.md`, load when running scripts or editing config: requirements, config fields, script map, output contracts, naming
-- `references/prompts/`, describe, merge, reconcile, Claude Design handoff, and shadcn map and theme templates; filled by the `inventory/prepare-*`, `design-handoff`, and `shadcn-prepare` scripts, never by hand
-- `scripts/`, run as documented in the guides: `doctor.mjs`, `save-session.mjs`, `parallel.mjs`, `screenshots.mjs`, `inventory/*.mjs`, `demo/record-demo.mjs`, `audit/*.mjs`, `lib/common.mjs`
+- `references/prompts/`, describe, merge, reconcile, Claude Design handoff, ChatGPT finish (`chatgpt-finish.md`), and shadcn map and theme templates; filled by the `inventory/prepare-*`, `design-handoff`, and `shadcn-prepare` scripts, never by hand
+- `scripts/`, run as documented in the guides: `doctor.mjs`, `save-session.mjs`, `parallel.mjs`, `screenshots.mjs`, `inventory/*.mjs`, `demo/record-demo.mjs`, `demo/build-cues.mjs`, `demo/review-demo.mjs`, `demo/make-video.sh`, `demo/chatgpt-handoff.mjs`, `audit/*.mjs`, `lib/common.mjs`, and the demo libraries `lib/demo-plan.mjs`, `lib/narration.mjs`, `lib/demo-actions.mjs`, `lib/demo-guard.mjs`, `lib/demo-cues.mjs`
 - `references/research/distilled-webapp-capture.md`, load to verify a claim about Playwright, DTCG, color math, WCAG, ffmpeg, or linting, or to settle a dispute
 - `references/research/raw/`, load when tracing a distilled claim to its primary source
 

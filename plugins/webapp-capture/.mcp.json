@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "replicate_video": {
+      "command": "python3",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/mcp/replicate-video/scripts/start_mcp.py"
+      ],
+      "env": {
+        "REPLICATE_API_TOKEN": "${user_config.replicate_api_token}"
+      }
+    }
+  }
+}

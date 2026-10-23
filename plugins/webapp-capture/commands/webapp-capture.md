@@ -1,6 +1,6 @@
 ---
 description: Capture a live web app. Demo video and script; component library with design tokens, a Claude Design handoff zip, and a shadcn/ui map; UI inconsistency audit. By Legion Code Inc.
-argument-hint: "[demo | screenshots | library | audit | shadcn | all | doctor] [app URL] [notes]"
+argument-hint: "[demo | screenshots | library | audit | shadcn | all | handoff | doctor] [app URL] [notes]"
 ---
 
 # /webapp-capture
@@ -42,6 +42,7 @@ Read `$ARGUMENTS`:
 | `audit` | Visual and code inconsistency audit (guide 03) |
 | `shadcn` | Map every captured component, variant, and theme token onto shadcn/ui (guide 04); builds the library first if it does not exist |
 | `all` | library, then audit, then shadcn, then demo, then the Claude Design handoff |
+| `handoff` | Package a recorded, reviewed demo for ChatGPT to add voiceover, an intro clip, and the final stitch (see the handoff step under demo) |
 | `doctor` | Environment and config check only |
 | missing | Ask the user which route they want |
 
@@ -53,12 +54,13 @@ Ask everything you cannot infer, in a single AskUserQuestion call where possible
 
 - **App origin** and **environment** (local, staging, seeded account, or production).
 - **Theme(s)** to capture (light, dark, both as separate runs) and how the app switches theme (system preference, class on `<html>`, stored preference).
+- **Landing page**: the real page the app opens right after sign-in (for example `/schedule`, not a guessed `/dashboard`). Set `routes.startPath` to it; main-navigation discovery and the first demo scene start there.
 - **Route discovery**: every link in the main navigation (default) or an explicit route list.
 - **Output location** in the current repository. Defaults: `library/design/` for library and demo, `library/requirements/reports/` for audits.
 - **Sensitive regions** to mask (customer names, emails, keys, billing).
 - **Onboarding setup**, when the local or seeded app is empty: the exact fields, values, and buttons required. Show the complete action plan and get explicit approval before setting `onboarding.approved: true`. Never run onboarding against production.
 - Route specifics:
-  - demo: audience, goal, target length (60 to 90 seconds by default), must-show flows, narration wanted (text only, or synthesized audio with the user's own TTS key).
+  - demo: audience, goal, target length (60 to 90 seconds by default), must-show flows, narration wanted (text only, or synthesized audio with the user's own TTS key), and every data change the demo needs (each becomes an approved entry in `writes[]`).
   - audit: path to the app's source code, if available.
   - library: whether to pilot on a few pages first (recommended for new apps).
   - shadcn: React shadcn/ui (default) or shadcn-svelte, and whether the target app already uses shadcn/ui.
@@ -133,12 +135,24 @@ Browser stages run through `SKILL_DIR/scripts/parallel.mjs`, which caps shards b
 
 ### demo (follow guide 01)
 
-1. Draft the narration script (hook, aha moment, walkthrough, social proof, call to action; about 140 words per minute) and a plan JSON from `scripts/demo/demo-plan.example.json`.
-2. Show both to the user. Only after explicit approval, set `"approved": true` in the plan. Never set it yourself on assumption.
-3. `PLAN=<plan> CAPTURE_CONFIG=<config> node SKILL_DIR/scripts/demo/record-demo.mjs`. It refuses unapproved plans and destructive or secret-looking targets.
-4. Run `make-video.sh` in the demo folder (ffmpeg required). Confirm `demo.mp4` exists and has a video and a subtitle stream (`ffprobe`).
-5. Read the key screenshots. Check for sensitive data.
-6. Narration audio only with the user's own TTS key from their secret manager; never ask them to paste a key into chat.
+1. Draft the narration script (hook, aha moment, walkthrough, social proof, call to action; about 140 words per minute) and a plan JSON from `scripts/demo/demo-plan.example.json`. Start the first scene on the real post-login landing page.
+2. Declare every scene that can change data in `writes[]` (id, scene, description, expected effect) and give each write scene read-only `verify` checks. Pick free slots from live state with `waitFor` and use `scrollElement` with `intoView` for time-based grids, instead of hardcoded times.
+3. Show the script, the plan, and the writes to the user. Only after explicit approval, set `"approved": true` on the plan and on each approved write. Never set either yourself on assumption.
+4. `PLAN=<plan> CAPTURE_CONFIG=<config> node SKILL_DIR/scripts/demo/record-demo.mjs`. It refuses unapproved plans and writes, destructive or credential-looking targets, and reruns that would repeat earlier writes.
+5. Read `writes-report.json` and `<output.demo>/findings.md`. Every write must be `verified`; report each mismatch, failure, or skipped write to the user. A retake goes to `<slug>-take-N` and needs `--retake` only after the user agrees the listed writes may repeat (or the data was reset).
+6. `DEMO_DIR=<demo folder> CAPTURE_CONFIG=<config> node SKILL_DIR/scripts/demo/review-demo.mjs`. Read `review/REVIEW.md` and every contact sheet; the user decides whether any personal data on screen is acceptable.
+7. If `narration/fit.md` reports overruns or the cut needs trimming, edit `segments.tsv`, then rerun `SKILL_DIR/scripts/demo/build-cues.mjs` with the same `DEMO_DIR`.
+8. Run `make-video.sh` in the demo folder (ffmpeg required). Confirm `demo.mp4` exists and has a video and a subtitle stream (`ffprobe`).
+9. Read the key screenshots. Check for sensitive data.
+10. Narration audio only with the user's own TTS key from their secret manager; never ask them to paste a key into chat. Use the one-clip-per-cue texts in `narration/tts/`.
+
+### handoff (finish in ChatGPT)
+
+1. Find the demo folder (ask if there is more than one). It must have `demo-silent.mp4` (run `make-video.sh` first) and `review/REVIEW.md` (run `review-demo.mjs` and have the user check every sheet).
+2. Ask in one round: intro wanted (yes or no), free stock B-roll or generated, product one-liner, audience, brand colors. Write that into a brief file and pass it as `INTRO_BRIEF`.
+3. `DEMO_DIR=<demo folder> INTRO_BRIEF=<brief> CAPTURE_CONFIG=<config> node SKILL_DIR/scripts/demo/chatgpt-handoff.mjs`. It refuses unreviewed demos, linked inputs and existing output.
+4. Tell the user, in plain words: attach the zip in ChatGPT with this plugin installed, connect ElevenLabs, and type "Read CHATGPT-INSTRUCTIONS.md and finish this demo video." For generated intros they need a Replicate token: `claude plugin configure webapp-capture@legioncodeinc` (or `/plugin`, Installed, Configure options) in Claude Code, or `python3 <plugin>/mcp/replicate-video/scripts/set_token.py` in their own terminal for ChatGPT. Never ask for the token in chat.
+5. Voice clips and the intro do not depend on each other; ChatGPT can make them in parallel. Only `finish_video.py` needs both.
 
 ### all
 

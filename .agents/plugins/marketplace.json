@@ -1,0 +1,20 @@
+{
+  "name": "legioncodeinc",
+  "interface": {
+    "displayName": "Legion Code Inc. Plugins"
+  },
+  "plugins": [
+    {
+      "name": "webapp-capture",
+      "source": {
+        "source": "local",
+        "path": "./plugins/webapp-capture"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Creativity"
+    }
+  ]
+}

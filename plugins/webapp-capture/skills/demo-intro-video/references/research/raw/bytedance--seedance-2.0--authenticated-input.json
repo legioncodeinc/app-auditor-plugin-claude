@@ -1,0 +1,138 @@
+{
+  "model": "bytedance/seedance-2.0",
+  "source": "https://api.replicate.com/v1/models/bytedance/seedance-2.0",
+  "fetched_at": "2026-10-11T00:49:26.501025+00:00",
+  "source_type": "Authenticated official model API; dereferenced input subset",
+  "version": "a6dcbae88b153e75fcccabacfb0eb430ab5be0a7ae27b316fc6f983658b349bc",
+  "input_schema": {
+    "type": "object",
+    "title": "Input",
+    "required": [
+      "prompt"
+    ],
+    "properties": {
+      "seed": {
+        "type": "integer",
+        "title": "Seed",
+        "default": null,
+        "x-order": 10,
+        "nullable": true,
+        "description": "Random seed. Set for reproducible generation."
+      },
+      "image": {
+        "type": "string",
+        "title": "Image",
+        "format": "uri",
+        "default": null,
+        "x-order": 1,
+        "nullable": true,
+        "description": "Input image for image-to-video generation (first frame). Cannot be combined with reference images."
+      },
+      "prompt": {
+        "type": "string",
+        "title": "Prompt",
+        "x-order": 0,
+        "maxLength": 4000,
+        "description": "Text prompt for video generation. Maximum 4000 characters. BytePlus recommends keeping prompts under 600 English words for best results."
+      },
+      "duration": {
+        "type": "integer",
+        "title": "Duration",
+        "default": 5,
+        "maximum": 15,
+        "minimum": -1,
+        "x-order": 6,
+        "description": "Video duration in seconds. Set to -1 for intelligent duration (model picks the best length)."
+      },
+      "resolution": {
+        "allOf": [
+          {
+            "enum": [
+              "480p",
+              "720p",
+              "1080p",
+              "4k"
+            ],
+            "type": "string",
+            "title": "resolution",
+            "description": "An enumeration."
+          }
+        ],
+        "default": "720p",
+        "x-order": 7,
+        "description": "Video resolution. 4K outputs 10-bit H.265/HEVC at high bitrate."
+      },
+      "aspect_ratio": {
+        "allOf": [
+          {
+            "enum": [
+              "16:9",
+              "4:3",
+              "1:1",
+              "3:4",
+              "9:16",
+              "21:9",
+              "9:21",
+              "adaptive"
+            ],
+            "type": "string",
+            "title": "aspect_ratio",
+            "description": "An enumeration."
+          }
+        ],
+        "default": "16:9",
+        "x-order": 8,
+        "description": "Video aspect ratio. Set to 'adaptive' to let the model choose the best ratio based on inputs."
+      },
+      "generate_audio": {
+        "type": "boolean",
+        "title": "Generate Audio",
+        "default": true,
+        "x-order": 9,
+        "description": "Generate synchronized audio with the video, including dialogue (use double quotes in prompt), sound effects, and background music."
+      },
+      "last_frame_image": {
+        "type": "string",
+        "title": "Last Frame Image",
+        "format": "uri",
+        "default": null,
+        "x-order": 2,
+        "nullable": true,
+        "description": "Input image for last frame generation. Only works if a first frame image is also provided. Cannot be combined with reference images."
+      },
+      "reference_audios": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uri"
+        },
+        "title": "Reference Audios",
+        "default": [],
+        "x-order": 5,
+        "description": "Reference audio files (up to 3, total duration max 15s) for audio-driven generation and lip-sync. Requires at least one reference image or video. Reference them in your prompt as [Audio1], [Audio2], etc."
+      },
+      "reference_images": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uri"
+        },
+        "title": "Reference Images",
+        "default": [],
+        "x-order": 3,
+        "description": "Reference images (up to 9) for character consistency, style guidance, and scene composition. Cannot be used together with first/last frame images. You can reference them in your prompt as [Image1], [Image2], etc."
+      },
+      "reference_videos": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uri"
+        },
+        "title": "Reference Videos",
+        "default": [],
+        "x-order": 4,
+        "description": "Reference videos (up to 3, total duration max 15s) for motion transfer, style reference, and editing. Reference them in your prompt as [Video1], [Video2], etc."
+      }
+    }
+  }
+}

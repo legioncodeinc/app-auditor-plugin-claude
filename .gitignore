@@ -38,7 +38,8 @@ bower_components
 build/Release
 
 # Dependency directories
-node_modules/
+# No trailing slash, so a symlinked node_modules is ignored too
+node_modules
 jspm_packages/
 
 # TypeScript v1 declaration files
@@ -92,3 +93,7 @@ typings/
 *.session.json
 auth.json
 .DS_Store
+
+# Python bytecode from the bundled Replicate video MCP
+__pycache__/
+*.pyc
